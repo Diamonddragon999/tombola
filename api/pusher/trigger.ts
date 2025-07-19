@@ -12,11 +12,13 @@ const pusher = new Pusher({
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { event, data } = req.body;
 
+  console.log('Triggering event:', event, data);
+
   try {
     await pusher.trigger('festival-channel', event, data);
     res.status(200).json({ success: true });
   } catch (err) {
-    console.error('Pusher error:', err);
-    res.status(500).json({ error: 'Pusher trigger failed' });
+    console.error('Pusher trigger failed:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 }

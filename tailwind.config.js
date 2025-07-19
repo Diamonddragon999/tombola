@@ -7,6 +7,11 @@ export default {
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
   ],
+  safelist:[
+    'data-[state=checked]:bg-blue-600','data-[state=checked]:border-blue-600',
+    'data-[state=checked]:bg-pink-600','data-[state=checked]:border-pink-600',
+    'data-[state=checked]:bg-red-600', 'data-[state=checked]:border-red-600',
+  ],
   theme: {
     extend: {
       borderRadius: {

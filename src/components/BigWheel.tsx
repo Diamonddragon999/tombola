@@ -10,7 +10,7 @@ import {
   addSpinResult,
   setSpinning,
 } from '../utils/gameState';
-import { listen, unlisten } from '../utils/realtime';
+import { listen, trigger, unlisten } from '../utils/realtime';
 import { Prize } from '../types/prizes';
 
 export function BigWheel() {
@@ -33,8 +33,12 @@ export function BigWheel() {
 
       const prize = selectRandomPrize();
       if (!prize) {
-        setMessage('Nu mai sunt premii disponibile!');
-        return;
+        // felie gri „Încearcă din nou!”
+        setSelectedPrize(null);          // PrizeWheel va alege slice‑ul „nothing”
+        setMessage(`${d.firstName} încearcă din nou…`);
+      } else {
+        setSelectedPrize(prize);
+        setMessage(`${d.firstName} învârte roata…`);
       }
       setSelectedPrize(prize);
       setIsSpinning(true);
@@ -47,7 +51,12 @@ export function BigWheel() {
 
   /* După terminarea animației */
   const handleSpinComplete = async () => {
-    if (!selectedPrize) return;
+    /* 2️⃣  dacă selectedPrize === null => n‑a câștigat nimic */
+    if (!selectedPrize) {
+       await trigger('spin_result', { firstName: currentPlayer, prize: null });
+       resetAfterDelay();                // funcție ajutătoare (vezi mai jos)
+       return;
+    }
 
     if (!consumePrize(selectedPrize.id)) {
       setMessage('Eroare la acordarea premiului!');
@@ -79,6 +88,16 @@ export function BigWheel() {
       setMessage('Așteptăm participanți…');
     }, 5000);
   };
+ /* -----------------Helper ---------------- */
+  function resetAfterDelay() {
+    setTimeout(() => {
+      setIsSpinning(false);
+      setSpinning(false);
+      setSelectedPrize(null);
+      setCurrentPlayer('');
+      setMessage('Așteptăm participanți…');
+    }, 5000);
+  }
 
   /* ---------- UI ---------- */
   return (

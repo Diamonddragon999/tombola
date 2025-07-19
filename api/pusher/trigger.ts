@@ -1,5 +1,4 @@
-// pages/api/pusher/trigger.ts (sau /api/pusher/trigger în src/)
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 import Pusher from 'pusher';
 
 const pusher = new Pusher({
@@ -17,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await pusher.trigger('festival-channel', event, data);
     res.status(200).json({ success: true });
   } catch (err) {
-    console.error('Pusher trigger failed:', err);
-    res.status(500).json({ success: false, error: err });
+    console.error('Pusher error:', err);
+    res.status(500).json({ error: 'Pusher trigger failed' });
   }
 }

@@ -1,17 +1,28 @@
 import Pusher from 'pusher-js';
 
-const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
-  cluster: import.meta.env.VITE_PUSHER_CLUSTER,
+const pusher = new Pusher('49a4432a7ced7b1ca6e3', {
+  cluster: 'eu',
   forceTLS: true,
 });
 
 const ch = pusher.subscribe('festival-channel');
 
-export const listen   = (ev: string, cb: (d: any) => void) => ch.bind(ev, cb);
-export const unlisten = (event: string, cb: (data:any)=>void): void => {
-  ch.unbind(event, cb);   // nu mai “return” nimic ➜ tipul e void
+// 🛠️ Log de stare, cu typing ca să scapi de TS7031
+pusher.connection.bind('state_change', (state: { previous: string; current: string }) => {
+  console.log('Pusher state', state.previous, '→', state.current);
+});
+
+// Optional: log global pentru toate evenimentele
+ch.bind_global((event: string, data: unknown) => {
+  if (!event.startsWith('pusher_internal'))
+    console.log('GLOBAL EVENT:', event, data);
+});
+
+export const listen = (ev: string, cb: (d: any) => void) => ch.bind(ev, cb);
+export const unlisten = (event: string, cb: (data: any) => void): void => {
+  ch.unbind(event, cb);
 };
-// POST la /api/pusher/trigger
+
 export const trigger = (event: string, data: any) =>
   fetch('/api/pusher/trigger', {
     method: 'POST',

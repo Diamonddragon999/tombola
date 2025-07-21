@@ -22,7 +22,21 @@ export default function BigWheel() {
 
   /* ───── la prima randare încărcăm felii din stock ───── */
   useEffect(() => {
-    setPrizes(getAvailablePrizes());
+    /* ➜ 1️⃣  stock curent */
+    const fresh = getAvailablePrizes();
+
+    /* ➜ 2️⃣  ecranul s‑a reîncărcat în timp ce roata era în curs   */
+    const cachedPrizes   = localStorage.getItem('prizes');
+    const cachedSelected = localStorage.getItem('selectedPrize');
+
+    if (cachedPrizes)   setPrizes(JSON.parse(cachedPrizes));
+    else                setPrizes(fresh);
+
+    if (cachedSelected) {
+      setSelected(JSON.parse(cachedSelected));
+      setSpinning(true);
+      setSpinningFlag(true);
+    }
   }, []);
 
   /* ───── cerere nouă de la telefon ───── */

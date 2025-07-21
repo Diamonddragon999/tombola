@@ -34,6 +34,8 @@ export default function PrizeWheel(p: WheelProps) {
   /* ---------- după acel return, TypeScript încă se plângea.
      forţăm non‑null cu “!” (e 100 % sigur aici). */
   // 🆕
+  
+    /* după return ştim sigur că p.selected există */
   const idx = p.prizes.findIndex(pr => pr.id === p.selected!.id);
 
   /* ---------- sunetul tic‑tic ------------------------------------ */
@@ -54,9 +56,8 @@ export default function PrizeWheel(p: WheelProps) {
     p.onDone();
   };
 
-  /* ---------- TRICK: Wheel as any pentru prop‑ul ‘showImage’ ------ */
-  // 🆕
-  const WheelAny = Wheel as unknown as React.ComponentType<any>;
+  /* ---------- TRICK: castăm la `any` ca să nu se plângă TS -------- */
+  const WheelAny: any = Wheel;
 
   return (
     <WheelAny

@@ -5,6 +5,7 @@ export interface Prize {
   name: string;
   rarity: Rarity;
   dailyStock: number;                //  99 999 ⇒ “∞” în UI
+  image?: string; // relativ la /public/
 }
 
 export const UNLIMITED = 99_999;     // folosit în logică + UI
@@ -28,9 +29,9 @@ export const RARITY_COLORS: Record<Rarity, string> = {
 };
 
 export const RARITY_WEIGHTS = {
-  voucher   : 40,
-  rare      : 39,
-  epic      : 20,
+  voucher   : 44,
+  rare      : 40,
+  epic      : 15,
   legendary : 1,
 };
 

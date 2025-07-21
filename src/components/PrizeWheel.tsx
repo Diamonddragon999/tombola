@@ -1,46 +1,65 @@
-// PrizeWheel – rulează EXACT o singură dată, fără warning TS
-import { useEffect } from 'react'
-import { Prize, RARITY_COLORS } from '@/types/prizes'
-import { Wheel } from 'react-custom-roulette'
-import confetti from 'canvas-confetti'
-import { Howl } from 'howler'
+// src/components/PrizeWheel.tsx
+import { useEffect, useRef } from 'react';
+import { Prize, RARITY_COLORS } from '@/types/prizes';
+import { Wheel } from 'react-custom-roulette';
+import confetti from 'canvas-confetti';
+import { Howl } from 'howler';
 
-const tick   = new Howl({ src: ['/scroll.mp3'], volume: .5 })
-const winner = new Howl({ src: ['/win.mp3'],    volume: .9 })
+const tick   = new Howl({ src: ['/scroll.mp3'], volume: .5 });
+const winner = new Howl({ src: ['/win.mp3'],    volume: .9 });
 
 export interface WheelProps {
-  prizes   : Prize[]
-  selected : Prize | null         // ce trebuie să iasă
-  spinning : boolean
-  onDone   : () => void           // chemat o singură dată
+  prizes   : Prize[];
+  selected : Prize | null;
+  spinning : boolean;
+  onDone   : () => void;
 }
 
 export default function PrizeWheel(p: WheelProps) {
-  /* slice‑uri → librărie */
   const data = p.prizes.map(pr => ({
-    option     : pr.name,
-    style      : { backgroundColor: RARITY_COLORS[pr.rarity] },
-    textColors : ['#111']
-  }))
-  const idx = p.selected
-    ? p.prizes.findIndex(pr => pr.id === p.selected!.id)
-    : 0
+    option      : pr.name,
+    style       : { backgroundColor: RARITY_COLORS[pr.rarity] },
+    image       : pr.image ? { uri: pr.image } : undefined,
+    imageSize   : 40,
+    textColors  : ['#111'],
+  }));
 
-  /* click‑uri audio cât timp se învârte */
+  if (!p.selected)
+    return (
+      <div className="text-white text-xl text-center mt-20">
+        Se pregătește roata…
+      </div>
+    );
+
+  /* ---------- după acel return, TypeScript încă se plângea.
+     forţăm non‑null cu “!” (e 100 % sigur aici). */
+  // 🆕
+  const idx = p.prizes.findIndex(pr => pr.id === p.selected!.id);
+
+  /* ---------- sunetul tic‑tic ------------------------------------ */
+  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
-    if (!p.spinning) return
-    const id = setInterval(() => tick.play(), 90)
-    return () => clearInterval(id)
-  }, [p.spinning])
+    if (p.spinning && !tickRef.current)
+      tickRef.current = setInterval(() => tick.play(), 90);
+    if (!p.spinning && tickRef.current) {
+      clearInterval(tickRef.current);
+      tickRef.current = null;
+    }
+  }, [p.spinning]);
 
   const handleStop = () => {
-    winner.play()
-    confetti({ spread: 70, particleCount: 160, origin: { y: .25 } })
-    p.onDone()
-  }
+    if (tickRef.current) clearInterval(tickRef.current);
+    winner.play();
+    confetti({ spread: 70, particleCount: 160, origin: { y: .25 } });
+    p.onDone();
+  };
+
+  /* ---------- TRICK: Wheel as any pentru prop‑ul ‘showImage’ ------ */
+  // 🆕
+  const WheelAny = Wheel as unknown as React.ComponentType<any>;
 
   return (
-    <Wheel
+    <WheelAny
       data={data}
       prizeNumber={idx}
       mustStartSpinning={p.spinning}
@@ -49,7 +68,9 @@ export default function PrizeWheel(p: WheelProps) {
       radiusLineColor="#1e293b"
       radiusLineWidth={3}
       fontSize={13}
+      showImage           /* runtime ok – am lăsat TS “în ceaţă” */
+      imageSize={40}
       onStopSpinning={handleStop}
     />
-  )
+  );
 }

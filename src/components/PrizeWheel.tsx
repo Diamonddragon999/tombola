@@ -15,24 +15,34 @@ export interface WheelProps {
 }
 
 export default function PrizeWheel(p: WheelProps) {
-  /* ---------- pregătim slice‑urile ---------- */
-  const data = p.prizes.map(pr => ({
+  /* ▸ 1. Fără selected ‑‑> placeholder  */
+  if (!p.selected)
+    return (
+      <div className="text-white text-xl text-center mt-20">
+        Se pregătește roata…
+      </div>
+    );
+
+  /* ▸ 2. Asigurăm că premiul ales EXISTĂ în felii           */
+  //  – dacă nu e, îl adăugăm la sfârşit
+  let slices = [...p.prizes];
+  let idx    = slices.findIndex(pr => pr.id === p.selected!.id);
+  if (idx === -1) {
+    slices.push(p.selected);          // mutăm referinţa…  
+    idx = slices.length - 1;          // …şi indicele devine valid
+  }
+
+  /* ▸ 3. Construim datele pentru roată din `slices`         */
+  const data = slices.map(pr => ({
     option     : pr.name,
     style      : { backgroundColor: RARITY_COLORS[pr.rarity] },
-    ...(pr.image ? { image: { uri: pr.image } } : {}),   // doar dacă există
+    image      : pr.image ? { uri: pr.image } : undefined,
+    imageSize  : 40,
     textColors : ['#111'],
   }));
 
-  /* până primim premiul ⇒ placeholder */
-  if (!p.selected)
-    return <div className="text-white text-xl text-center mt-20">Se pregătește roata…</div>;
-
-  /* idx fallback (nu lăsăm −1) */
-  let idx = p.prizes.findIndex(pr => pr.id === p.selected!.id);
-  if (idx < 0) idx = 0;
-
-  /* ---------- sunet tic‑tic ---------- */
-  const tickRef = useRef<ReturnType<typeof setInterval>|null>(null);
+  /* ▸ 4. Sunetul tic‑tic (neschimbat)                       */
+  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
     if (p.spinning && !tickRef.current)
       tickRef.current = setInterval(() => tick.play(), 90);
@@ -45,15 +55,13 @@ export default function PrizeWheel(p: WheelProps) {
   const handleStop = () => {
     if (tickRef.current) clearInterval(tickRef.current);
     winner.play();
-    confetti({ spread: 70, particleCount: 160, origin: { y: 0.25 } });
+    confetti({ spread: 70, particleCount: 160, origin: { y: .25 } });
     p.onDone();
   };
 
+  /* ▸ 5. Wheel fără typings pentru `showImage`              */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const WheelAny: any = Wheel;
-
-  /* folosim showImage DOAR dacă toate slice‑urile au imagine */
-  const everyHasImage = data.every(s => 'image' in s);
 
   return (
     <WheelAny
@@ -65,8 +73,10 @@ export default function PrizeWheel(p: WheelProps) {
       radiusLineColor="#1e293b"
       radiusLineWidth={3}
       fontSize={13}
-      {...(everyHasImage ? { showImage: true, imageSize: 40 } : {})}
+      showImage
+      imageSize={40}
       onStopSpinning={handleStop}
     />
   );
 }
+

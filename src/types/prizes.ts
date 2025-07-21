@@ -43,9 +43,9 @@ export interface ParticipantData {
   timestamp: number;
 }
 export interface SpinResult {
-  prize: Prize | null;
-  firstName: string;
-  timestamp: number;
+  prize: Prize
+  firstName: string
+  timestamp: number
 }
 export interface GameState {
   day: string;

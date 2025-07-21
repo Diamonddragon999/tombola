@@ -91,3 +91,17 @@ export function exportGameData(): string {
     spinResults: gs.spinResults,
   }, null, 2);
 }
+
+export function exportGameDataCsv(): string {
+  const gs = getGameState()
+  const rows = [
+    ['Prenume','Nume','Email','Social','Newsletter','Timp'],
+    ...gs.participants.map(p=>[
+      p.firstName, p.lastName, p.email,
+      p.followsSocial?'da':'nu',
+      p.newsletterConsent?'da':'nu',
+      new Date(p.timestamp).toLocaleString()
+    ])
+  ]
+  return rows.map(r=>r.join(',')).join('\n')
+}

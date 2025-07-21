@@ -1,61 +1,55 @@
-// src/components/PrizeWheel.tsx
-import { Wheel } from 'react-custom-roulette';
-import { Prize, RARITY_COLORS } from '@/types/prizes';
-import { useEffect } from 'react';
-import confetti from 'canvas-confetti';
-import { Howl } from 'howler';
+// PrizeWheel – rulează EXACT o singură dată, fără warning TS
+import { useEffect } from 'react'
+import { Prize, RARITY_COLORS } from '@/types/prizes'
+import { Wheel } from 'react-custom-roulette'
+import confetti from 'canvas-confetti'
+import { Howl } from 'howler'
 
-const tick   = new Howl({ src: ['/scroll.mp3'], volume: 0.5 });
-const winner = new Howl({ src: ['/win.mp3'],    volume: 0.9 });
+const tick   = new Howl({ src: ['/scroll.mp3'], volume: .5 })
+const winner = new Howl({ src: ['/win.mp3'],    volume: .9 })
 
-interface Props {
-  prizes: Prize[];            // toate premiile rămase AZI (∞ voucher inclus)
-  selected: Prize | null;     // premiul deciS de backend
-  spinning: boolean;
-  onDone: () => void;
+export interface WheelProps {
+  prizes   : Prize[]
+  selected : Prize | null         // ce trebuie să iasă
+  spinning : boolean
+  onDone   : () => void           // chemat o singură dată
 }
 
-export default function PrizeWheel({
-  prizes, selected, spinning, onDone,
-}: Props) {
-  /* 1️⃣  pregătim slice‑urile pt <Wheel> */
-  const data = prizes.map(p => ({
-    option: p.name,
-    style : { backgroundColor: RARITY_COLORS[p.rarity] },
-    textColors: ['#111'],
-  }));
+export default function PrizeWheel(p: WheelProps) {
+  /* slice‑uri → librărie */
+  const data = p.prizes.map(pr => ({
+    option     : pr.name,
+    style      : { backgroundColor: RARITY_COLORS[pr.rarity] },
+    textColors : ['#111']
+  }))
+  const idx = p.selected
+    ? p.prizes.findIndex(pr => pr.id === p.selected!.id)
+    : 0
 
-  /* 2️⃣  indexul la care trebuie să se oprească */
-  const mustStopAt = selected
-    ? prizes.findIndex(p => p.id === selected.id)
-    : 0;                                       // fallback (n‑ar trebui)
-
-  /* 3️⃣  sunete + confetti */
+  /* click‑uri audio cât timp se învârte */
   useEffect(() => {
-    if (spinning) {
-      const id = setInterval(() => tick.play(), 85);   // click la ~12 Hz
-      return () => clearInterval(id);
-    }
-  }, [spinning]);
+    if (!p.spinning) return
+    const id = setInterval(() => tick.play(), 90)
+    return () => clearInterval(id)
+  }, [p.spinning])
 
   const handleStop = () => {
-    winner.play();
-    confetti({ spread: 80, particleCount: 160, origin: { y: 0.22 } });
-    onDone();
-  };
+    winner.play()
+    confetti({ spread: 70, particleCount: 160, origin: { y: .25 } })
+    p.onDone()
+  }
 
   return (
     <Wheel
-      mustStartSpinning={spinning}
-      prizeNumber={mustStopAt}
       data={data}
-
-      spinDuration={0.7}         // secunde – smooth, nu iese din viewport
-      fontSize={13}
-      radiusLineWidth={3}
+      prizeNumber={idx}
+      mustStartSpinning={p.spinning}
+      spinDuration={0.7}
       perpendicularText
       radiusLineColor="#1e293b"
+      radiusLineWidth={3}
+      fontSize={13}
       onStopSpinning={handleStop}
     />
-  );
+  )
 }

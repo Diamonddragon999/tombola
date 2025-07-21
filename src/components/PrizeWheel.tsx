@@ -16,7 +16,7 @@ export interface WheelProps {
 }
 
 export default function PrizeWheel(p: WheelProps) {
-  /* ---------------- slice data ---------------- */
+  /* ---------- slice data ---------- */
   const data = p.prizes.map(pr => ({
     option     : pr.name,
     style      : { backgroundColor: RARITY_COLORS[pr.rarity] },
@@ -25,14 +25,15 @@ export default function PrizeWheel(p: WheelProps) {
     textColors : ['#111'],
   }));
 
-  /* până primim “selected” afişăm placeholder‑ul */
+  /* până primim premiul => placeholder */
   if (!p.selected)
     return <div className="text-white text-xl text-center mt-20">Se pregătește roata…</div>;
 
-  /* sigur avem selected ⇒ “!” ptr. TS */
-  const idx = p.prizes.findIndex(pr => pr.id === p.selected!.id);
+  /* sigur avem selected ⇒ idx nu va fi ‑1 (dar tot protejăm) */
+  let idx = p.prizes.findIndex(pr => pr.id === p.selected!.id);
+  if (idx < 0) idx = 0;
 
-  /* ---------------- sunet tick‑tick ----------- */
+  /* ---------- sunet tick‑tick ---------- */
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
     if (p.spinning && !tickRef.current)
@@ -50,11 +51,9 @@ export default function PrizeWheel(p: WheelProps) {
     p.onDone();
   };
 
-  /* Wheel tip‑less ca să putem trimite `showImage` */
+  /* Wheel tip‑less ca să putem da showImage */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const WheelAny: any = Wheel;
-  
-  console.log('PrizeWheel rendered – p.selected:', p.selected);
 
   return (
     <WheelAny
@@ -66,7 +65,7 @@ export default function PrizeWheel(p: WheelProps) {
       radiusLineColor="#1e293b"
       radiusLineWidth={3}
       fontSize={13}
-      showImage          /* OK la runtime, ignorat de TS */
+      showImage
       imageSize={40}
       onStopSpinning={handleStop}
     />

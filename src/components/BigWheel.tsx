@@ -17,7 +17,7 @@ export default function BigWheel() {
   const [player,   setPlayer]   = useState('');
   const [msg,      setMsg]      = useState('Așteptăm participanți…');
 
-  /* ---------- init & posibil refresh în timp de spin ---------- */
+  /* ───── init (+ refresh în mijlocul unui spin) ───── */
   useEffect(() => {
     const fresh          = getAvailablePrizes();
     const cachedPrizes   = localStorage.getItem('prizes');
@@ -30,27 +30,28 @@ export default function BigWheel() {
       setSpinning(true);
       setSpinningFlag(true);
     }
-
-    console.log('=== INIT ===');
-    console.log('Cached selectedPrize:', cachedSelected);
-    console.log('Selected:', selected);
-    console.log('Prizes:', prizes);
   }, []);
 
-  
-
-  /* ---------- request din telefon ----------------------------- */
+  /* ───── request nou de la telefon ───── */
   const handleRequest = useCallback((d: { firstName: string }) => {
     if (spinning) return;
 
+    /* 1️⃣  actualizăm lista înainte de orice */
+    const fresh = getAvailablePrizes();
+    setPrizes(fresh);
+
+    /* 2️⃣  alegem premiul */
     const prize = pickPrize();
+
+    /* 3️⃣  UI state */
     setPlayer(d.firstName);
     setSelected(prize);
     setMsg(`${d.firstName} învârte roata…`);
     setSpinning(true);
     setSpinningFlag(true);
 
-    localStorage.setItem('prizes',        JSON.stringify(getAvailablePrizes()));
+    /* 4️⃣  persistăm pt. refresh */
+    localStorage.setItem('prizes',        JSON.stringify(fresh));
     localStorage.setItem('selectedPrize', JSON.stringify(prize));
   }, [spinning]);
 
@@ -59,7 +60,7 @@ export default function BigWheel() {
     return () => unlisten('request_spin', handleRequest);
   }, [handleRequest]);
 
-  /* ---------- roata s‑a oprit ------------------------------- */
+  /* ───── roata a terminat ───── */
   const handleDone = async () => {
     if (!selected) return;
 
@@ -82,7 +83,7 @@ export default function BigWheel() {
     }, 5_000);
   };
 
-  /* ---------- UI ------------------------------------------- */
+  /* ───── UI ───── */
   const qrUrl = `${window.location.origin}/spin`;
 
   return (
@@ -97,12 +98,14 @@ export default function BigWheel() {
       </header>
 
       <main className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-8 px-8">
+        {/* QR */}
         <section className="lg:flex-1 flex justify-center">
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
             <QRCodeDisplay url={qrUrl} size={250} />
           </div>
         </section>
 
+        {/* Wheel */}
         <section className="lg:flex-1 flex justify-center">
           {prizes.length ? (
             <PrizeWheel

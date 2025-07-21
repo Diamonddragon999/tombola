@@ -1,7 +1,10 @@
-/* useJoinForm.ts */
+/* doar logica formularului */
 import { useEffect, useState } from 'react';
 import { trigger, listen, unlisten } from '@/utils/realtime';
-import { addParticipant, setSpinning } from '@/utils/gameState';
+import {
+  addParticipant,
+  setSpinning,
+} from '@/utils/gameState';
 
 export type JoinData = {
   firstName: string;
@@ -32,16 +35,14 @@ export function useJoinForm() {
   const [state, setState] = useState<JoinState>('idle');
   const [prizeWon, setPrizeWon] = useState<string>('');
 
-  // Reset spinning flag on mount
-  useEffect(() => {
-    setSpinning(false);
-  }, []);
+  /* oprire flag local când deschizi pagina */
+  useEffect(() => setSpinning(false), []);
 
-  // Listen for spin result from display
+  /* răspuns de la ecranul mare */
   useEffect(() => {
     const cb = (d: any) => {
       setSpinning(false);
-      setPrizeWon(d?.prize?.name ?? 'Nimic 😢');
+      setPrizeWon(d.prize?.name ?? 'Voucher 5 %');
       setState('won');
     };
     listen('spin_result', cb);
@@ -52,25 +53,24 @@ export function useJoinForm() {
   const validate = () => {
     const e: Record<string, string> = {};
     if (!data.firstName.trim()) e.firstName = 'Prenumele e obligatoriu';
-    if (!data.lastName.trim()) e.lastName = 'Numele e obligatoriu';
+    if (!data.lastName.trim())  e.lastName  = 'Numele e obligatoriu';
     if (!/\S+@\S+\.\S+/.test(data.email)) e.email = 'Email invalid';
     if (+data.age < 18) e.age = 'Trebuie 18+';
     if (!data.followsFacebook && !data.followsInstagram && !data.followsYoutube)
       e.social = 'Alege cel puțin o platformă';
     if (!data.newsletterConsent) e.newsletterConsent = 'Acceptă newsletter‑ul';
     setErrors(e);
-    return Object.keys(e).length === 0;
+    return !Object.keys(e).length;
   };
 
-  /* ---------------- SUBMIT ------------------ */
+  /* ---------------- SUBMIT ---------------- */
   const submit = async () => {
     if (!validate()) return;
 
-    // Add participant locally
     addParticipant({
       firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
+      lastName : data.lastName,
+      email    : data.email,
       followsSocial:
         data.followsFacebook || data.followsInstagram || data.followsYoutube,
       newsletterConsent: data.newsletterConsent,
@@ -78,7 +78,6 @@ export function useJoinForm() {
 
     setSpinning(true);
     setState('waiting');
-
     await trigger('request_spin', { firstName: data.firstName });
   };
 

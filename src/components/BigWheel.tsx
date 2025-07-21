@@ -1,108 +1,73 @@
 import { useEffect, useState } from 'react';
-import { PrizeWheel }     from './PrizeWheel';
-import { StockTable }     from './StockTable';
-import { QRCodeDisplay }  from './QRCodeDisplay';
+import { PrizeWheel } from './PrizeWheel';
+import { StockTable } from './StockTable';
+import { QRCodeDisplay } from './QRCodeDisplay';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   getAvailablePrizes,
-  selectRandomPrize,
+  pickPrize,
   consumePrize,
   addSpinResult,
   setSpinning,
-} from '../utils/gameState';
-import { listen, trigger, unlisten } from '../utils/realtime';
-import { Prize } from '../types/prizes';
+} from '@/utils/gameState';
+import { listen, trigger, unlisten } from '@/utils/realtime';
+import { Prize } from '@/types/prizes';
 
 export function BigWheel() {
-  const [currentPrizes,  setCurrentPrizes]  = useState<Prize[]>([]);
-  const [selectedPrize,  setSelectedPrize]  = useState<Prize | null>(null);
-  const [isSpinning,     setIsSpinning]     = useState(false);
-  const [currentPlayer,  setCurrentPlayer]  = useState('');
-  const [message,        setMessage]        = useState('Așteptăm participanți…');
+  const [currentPrizes, setCurrentPrizes] = useState<Prize[]>([]);
+  const [selectedPrize, setSelectedPrize] = useState<Prize | null>(null);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [currentPlayer, setCurrentPlayer] = useState('');
+  const [message, setMessage] = useState('Așteptăm participanți…');
   const qrUrl = `${window.location.origin}/spin`;
 
-  /* Stock inițial */
+  /* stock iniţial */
   useEffect(() => setCurrentPrizes(getAvailablePrizes()), []);
 
-  /* Ascultă cereri de la telefoane */
+  /* cerere de la telefon ------------------------------------------- */
   useEffect(() => {
     const cb = (d: any) => {
       if (isSpinning) return;
-      setCurrentPlayer(d.firstName);
-      setMessage(`${d.firstName} învârte roata…`);
+      const prize = pickPrize();
 
-      const prize = selectRandomPrize();
-      if (!prize) {
-        // felie gri „Încearcă din nou!”
-        setSelectedPrize(null);          // PrizeWheel va alege slice‑ul „nothing”
-        setMessage(`${d.firstName} încearcă din nou…`);
-      } else {
-        setSelectedPrize(prize);
-        setMessage(`${d.firstName} învârte roata…`);
-      }
+      setCurrentPlayer(d.firstName);
       setSelectedPrize(prize);
+      setMessage(`${d.firstName} învârte roata…`);
       setIsSpinning(true);
     };
 
     listen('request_spin', cb);
-    /*  cleanup – trebuie să întoarcă void! */
-    return () => { unlisten('request_spin', cb); };
+    return () => unlisten('request_spin', cb);
   }, [isSpinning]);
 
-  /* După terminarea animației */
+  /* după animaţie --------------------------------------------------- */
   const handleSpinComplete = async () => {
-    /* 2️⃣  dacă selectedPrize === null => n‑a câștigat nimic */
-    if (!selectedPrize) {
-       await trigger('spin_result', { firstName: currentPlayer, prize: null });
-       resetAfterDelay();                // funcție ajutătoare (vezi mai jos)
-       return;
-    }
+    if (!selectedPrize) return;         // safety
 
-    if (!consumePrize(selectedPrize.id)) {
-      setMessage('Eroare la acordarea premiului!');
-      setIsSpinning(false);
-      setSpinning(false);
-      return;
-    }
-
+    consumePrize(selectedPrize.id);
     addSpinResult({ prize: selectedPrize, firstName: currentPlayer });
     setMessage(`${currentPlayer} a câștigat: ${selectedPrize.name}!`);
 
-    /* Trimite către pusher backend */
-    await fetch('/api/pusher/trigger', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        event: 'spin_result',
-        data: { firstName: currentPlayer, prize: selectedPrize },
-      }),
+    await trigger('spin_result', {
+      firstName: currentPlayer,
+      prize: selectedPrize,
     });
 
     setCurrentPrizes(getAvailablePrizes());
-
-    setTimeout(() => {
-      setIsSpinning(false);
-      setSpinning(false);
-      setSelectedPrize(null);
-      setCurrentPlayer('');
-      setMessage('Așteptăm participanți…');
-    }, 5000);
+    setTimeout(resetState, 5000);
   };
- /* -----------------Helper ---------------- */
-  function resetAfterDelay() {
-    setTimeout(() => {
-      setIsSpinning(false);
-      setSpinning(false);
-      setSelectedPrize(null);
-      setCurrentPlayer('');
-      setMessage('Așteptăm participanți…');
-    }, 5000);
+
+  function resetState() {
+    setIsSpinning(false);
+    setSpinning(false);
+    setSelectedPrize(null);
+    setCurrentPlayer('');
+    setMessage('Așteptăm participanți…');
   }
 
-  /* ---------- UI ---------- */
+  /* UI -------------------------------------------------------------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex flex-col">
-      {/* HEADER + mesaj */}
       <div className="p-8 text-center">
         <img
           src="https://rovision.ro/wp-content/themes/storefront-child/rovision-logo.svg"
@@ -112,16 +77,13 @@ export function BigWheel() {
         <h2 className="text-3xl font-bold text-white">{message}</h2>
       </div>
 
-      {/* QR + Wheel */}
       <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-8 px-8">
-        {/* QR stânga */}
         <div className="lg:flex-1 flex justify-center">
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
             <QRCodeDisplay url={qrUrl} size={250} />
           </div>
         </div>
 
-        {/* Roata */}
         <div className="lg:flex-1 flex justify-center">
           {currentPrizes.length ? (
             <PrizeWheel
@@ -142,7 +104,6 @@ export function BigWheel() {
         </div>
       </div>
 
-      {/* Tabel stoc */}
       <div className="p-8">
         <StockTable />
       </div>

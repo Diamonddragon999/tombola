@@ -13,7 +13,7 @@ import { SocialCheck } from './SocialCheck';
 import { useJoinForm } from './useJoinForm';
 
 export default function JoinFormUI() {
-  const { data, setData, errors, state, submit } = useJoinForm();
+  const { data, setData, errors, state, submit, prizeWon } = useJoinForm();
 
   if (state !== 'idle')
     return (
@@ -21,13 +21,15 @@ export default function JoinFormUI() {
         <Card className="max-w-md w-full bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader>
             <CardTitle className="text-2xl text-white text-center">
-              {state === 'waiting' ? 'Așteptăm rândul tău…' : 'Mulțumim!'}
+              {state === 'waiting'
+                ? 'Așteptăm rândul tău…'
+                : `Felicitări! Ai câștigat: ${prizeWon}`}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center text-gray-100">
             {state === 'waiting'
               ? 'Roata se învârte! Urmărește ecranul mare.'
-              : 'Verifică‑ți emailul pentru detalii.'}
+              : 'Prezintă acest ecran staff‑ului pentru ridicarea premiului.'}
           </CardContent>
         </Card>
       </div>

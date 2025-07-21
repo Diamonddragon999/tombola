@@ -1,4 +1,3 @@
-// PrizeWheel.tsx
 import { useEffect, useRef } from 'react';
 import { Prize, RARITY_COLORS } from '@/types/prizes';
 import { Wheel } from 'react-custom-roulette';
@@ -16,25 +15,24 @@ export interface WheelProps {
 }
 
 export default function PrizeWheel(p: WheelProps) {
-  /* ---------- slice data ---------- */
+  /* ---------- pregătim slice‑urile ---------- */
   const data = p.prizes.map(pr => ({
     option     : pr.name,
     style      : { backgroundColor: RARITY_COLORS[pr.rarity] },
-    image      : pr.image ? { uri: pr.image } : undefined,
-    imageSize  : 40,
+    ...(pr.image ? { image: { uri: pr.image } } : {}),   // doar dacă există
     textColors : ['#111'],
   }));
 
-  /* până primim premiul => placeholder */
+  /* până primim premiul ⇒ placeholder */
   if (!p.selected)
     return <div className="text-white text-xl text-center mt-20">Se pregătește roata…</div>;
 
-  /* sigur avem selected ⇒ idx nu va fi ‑1 (dar tot protejăm) */
+  /* idx fallback (nu lăsăm −1) */
   let idx = p.prizes.findIndex(pr => pr.id === p.selected!.id);
   if (idx < 0) idx = 0;
 
-  /* ---------- sunet tick‑tick ---------- */
-  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  /* ---------- sunet tic‑tic ---------- */
+  const tickRef = useRef<ReturnType<typeof setInterval>|null>(null);
   useEffect(() => {
     if (p.spinning && !tickRef.current)
       tickRef.current = setInterval(() => tick.play(), 90);
@@ -51,9 +49,11 @@ export default function PrizeWheel(p: WheelProps) {
     p.onDone();
   };
 
-  /* Wheel tip‑less ca să putem da showImage */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const WheelAny: any = Wheel;
+
+  /* folosim showImage DOAR dacă toate slice‑urile au imagine */
+  const everyHasImage = data.every(s => 'image' in s);
 
   return (
     <WheelAny
@@ -65,8 +65,7 @@ export default function PrizeWheel(p: WheelProps) {
       radiusLineColor="#1e293b"
       radiusLineWidth={3}
       fontSize={13}
-      showImage
-      imageSize={40}
+      {...(everyHasImage ? { showImage: true, imageSize: 40 } : {})}
       onStopSpinning={handleStop}
     />
   );

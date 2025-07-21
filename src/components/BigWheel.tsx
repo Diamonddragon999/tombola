@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PrizeWheel } from './PrizeWheel';
+import PrizeWheel from './PrizeWheel';
 import { StockTable } from './StockTable';
 import { QRCodeDisplay } from './QRCodeDisplay';
 import { Card, CardContent } from '@/components/ui/card';
@@ -82,9 +82,9 @@ export function BigWheel() {
           {currentPrizes.length ? (
             <PrizeWheel
               prizes={currentPrizes}
-              selectedPrize={selectedPrize}         // ✅ denumire corectă
-              isSpinning={spinning}                 // ✅ denumire corectă
-              onSpinComplete={handleSpinComplete}   // ✅ denumire corectă
+              selected={selectedPrize}
+              spinning={spinning}
+              onDone={handleSpinComplete}
             />
 
           ) : (

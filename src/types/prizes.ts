@@ -15,7 +15,7 @@ export const PRIZES: Prize[] = [
   { id: 'manusi',     name: 'Mănuși Hikvision',      rarity: 'rare',    dailyStock: 8 },
   { id: 'breloc',     name: 'Breloc Dahua',          rarity: 'rare',    dailyStock: 8 },
   { id: 'pix',        name: 'Pix Dahua',             rarity: 'rare',    dailyStock: 8 },
-  { id: 'incarcator', name: 'Încărcător 45 W',       rarity: 'rare',    dailyStock: 12 },
+  { id: 'incarcator', name: 'Încărcător 45 W',       rarity: 'epic',    dailyStock: 12 },
   { id: 'stick',      name: 'Stick 16 GB Dahua',     rarity: 'epic',    dailyStock: 8 },
   { id: 'kit',        name: 'Kit 2 Camere Hilook',   rarity: 'legendary', dailyStock: 1 },
 ];
@@ -29,8 +29,8 @@ export const RARITY_COLORS: Record<Rarity, string> = {
 
 export const RARITY_WEIGHTS = {
   voucher   : 40,
-  rare      : 40,
-  epic      : 19,
+  rare      : 34,
+  epic      : 25,
   legendary : 1,
 };
 

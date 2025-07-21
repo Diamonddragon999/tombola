@@ -1,126 +1,158 @@
-import { motion } from 'framer-motion';
-import { Prize, RARITY_COLORS, RARITY_WEIGHTS } from '@/types/prizes';
+// src/components/PrizeWheel.tsx
+import { useEffect, useRef } from 'react';
+import { Prize, RARITY_COLORS } from '@/types/prizes';
+import confetti from 'canvas-confetti';
+import { Howl } from 'howler';
 
+const spinSound = new Howl({ src: ['/scroll.mp3'], volume: 0.45 });
+const winSound  = new Howl({ src: ['/win.mp3'],    volume: 0.9  });
+
+/* ---------- CONFIG ---------- */
+const SIZE        = 540;          // px
+const FULL_ROT    = 2 * Math.PI;
+const DECAY       = 0.984;        // fricţiune
+const START_SPEED = 0.34;         // rad / frame (~20 RPM)
+const FONT        = '600 16px "Inter",sans-serif';
+
+/* ---------- INTERFAŢĂ ---------- */
 interface Props {
-  prizes: Prize[];            // UN exemplar / premiu
-  selected: Prize | null;     // premiul care trebuie să pice
-  spinning: boolean;
-  onDone: () => void;
+  prizes: Prize[];
+  selectedPrize: Prize | null;
+  isSpinning: boolean;
+  onSpinComplete: () => void;
 }
 
-/* -------------------------------- util -------------------------------- */
-function arcPath(
-  cx: number, cy: number, r: number,
-  startDeg: number, sweepDeg: number,
-) {
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
-  const a0 = toRad(startDeg);
-  const a1 = toRad(startDeg + sweepDeg);
-  const x0 = cx + r * Math.cos(a0);
-  const y0 = cy + r * Math.sin(a0);
-  const x1 = cx + r * Math.cos(a1);
-  const y1 = cy + r * Math.sin(a1);
-  const largeArc = sweepDeg > 180 ? 1 : 0;
-  return `M ${cx} ${cy} L ${x0} ${y0} A ${r} ${r} 0 ${largeArc} 1 ${x1} ${y1} Z`;
-}
+/* =================================================================== */
+export function PrizeWheel({
+  prizes,
+  selectedPrize,
+  isSpinning,
+  onSpinComplete,
+}: Props) {
+  const canvasRef         = useRef<HTMLCanvasElement>(null);
+  const requestRef        = useRef<number>();
+  const angleRef          = useRef(0);
+  const speedRef          = useRef(0);
+  const lastSliceIndexRef = useRef(-1);
 
-export function PrizeWheel({ prizes, selected, spinning, onDone }: Props) {
-  const radius  = 200;
-  const center  = 250;
+  /* ------------- DESEN ------------- */
+  function draw(ctx: CanvasRenderingContext2D) {
+    const r = SIZE / 2;
+    ctx.clearRect(0, 0, SIZE, SIZE);
 
-  /* ------------------- calc unghiuri ponderate ------------------- */
-  const totalW  = prizes.reduce((s, p) => s + RARITY_WEIGHTS[p.rarity], 0);
-  const slices  = prizes.map(p => ({
-    prize : p,
-    sweep : (RARITY_WEIGHTS[p.rarity] / totalW) * 360,
-  }));
+    const slice = FULL_ROT / prizes.length;
 
-  /* start angle pentru fiecare felie */
-  let acc = 0;
-  const layout = slices.map(s => {
-    const start = acc;
-    acc += s.sweep;
-    return { ...s, start };
-  });
+    /* felii */
+    prizes.forEach((p, i) => {
+      const start = angleRef.current + i * slice;
+      const end   = start + slice;
 
-  /* unde trebuie să se oprească roata */
-  const sel   = selected
-    ? layout.find(l => l.prize.id === selected.id)
-    : undefined;
-  const target =
-    sel
-      ? 360 - (sel.start + sel.sweep / 2) + (Math.random() * 20 - 10)
-      : 0;
-  const final = 5 * 360 + target;
+      ctx.beginPath();
+      ctx.moveTo(r, r);
+      ctx.arc(r, r, r - 6, start, end);      // -6 = mic padding pt bordură
+      const grad = ctx.createRadialGradient(r, r, 0, r, r, r);
+      grad.addColorStop(0,    `${RARITY_COLORS[p.rarity]}22`);
+      grad.addColorStop(0.85, `${RARITY_COLORS[p.rarity]}`);
+      grad.addColorStop(1,    `${RARITY_COLORS[p.rarity]}`);
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth   = 3;
+      ctx.fill();
+      ctx.stroke();
 
-  /* ----------------------------- svg ------------------------------ */
-  return (
-    <div className="relative">
-      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 blur-xl opacity-20 animate-pulse" />
+      /* text */
+      ctx.save();
+      ctx.translate(r, r);
+      ctx.rotate(start + slice / 2);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#fff';
+      ctx.font = FONT;
+      const txt = p.name.length > 18 ? `${p.name.slice(0, 17)}…` : p.name;
+      ctx.fillText(txt, r - 22, 6);          // padding spre centru
+      ctx.restore();
+    });
 
-      <motion.svg
-        width={500}
-        height={500}
-        className="relative z-10 drop-shadow-2xl"
-        animate={spinning ? { rotate: final } : {}}
-        transition={{ duration: 4, ease: [0.25, 0.46, 0.45, 0.94] }}
-        onAnimationComplete={onDone}
-      >
-        <circle
-          cx={center}
-          cy={center}
-          r={radius + 10}
-          fill="#1f2937"
-          stroke="#374151"
-          strokeWidth={3}
-        />
+    /* inel central + “logo” simplu */
+    ctx.beginPath();
+    ctx.arc(r, r, 36, 0, FULL_ROT);
+    ctx.fillStyle = '#0f172a';
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 4;
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#facc15';
+    ctx.font = '700 20px Inter,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('R', r, r + 7);
 
-        {layout.map(l => (
-          <g key={l.prize.id}>
-            <path
-              d={arcPath(center, center, radius, l.start, l.sweep)}
-              fill={RARITY_COLORS[l.prize.rarity]}
-              stroke="#000"
-              strokeWidth={2}
-            />
-            {/* text pe mijlocul arcului */}
-            {l.sweep > 10 && (
-              <text
-                x={center}
-                y={center}
-                transform={`
-                  rotate(${l.start + l.sweep / 2} ${center} ${center})
-                  translate(0 -${radius * 0.6})
-                  rotate(${90})
-                `}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fill="#000"
-                fontSize={l.sweep < 28 ? 10 : 12}
-                fontWeight="bold"
-              >
-                {l.prize.name.length > 16
-                  ? l.prize.name.slice(0, 13) + '…'
-                  : l.prize.name}
-              </text>
-            )}
-          </g>
-        ))}
+    /* pointer */
+    ctx.save();
+    ctx.translate(r, r);
+    ctx.rotate(-Math.PI / 2);
+    ctx.beginPath();
+    ctx.moveTo(r - 18, -12);
+    ctx.lineTo(r - 18,  12);
+    ctx.lineTo(r,        0);
+    ctx.closePath();
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = '#0008';
+    ctx.shadowBlur  = 5;
+    ctx.fill();
+    ctx.restore();
+  }
 
-        <circle
-          cx={center}
-          cy={center}
-          r={25}
-          fill="#1f2937"
-          stroke="#374151"
-          strokeWidth={3}
-        />
-      </motion.svg>
+  /* ------------- ANIMAŢIE ------------- */
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d')!;
+    canvas.width = SIZE;
+    canvas.height = SIZE;
 
-      {/* pointer */}
-      <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20">
-        <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-b-[30px] border-l-transparent border-r-transparent border-b-red-500" />
-      </div>
-    </div>
-  );
+    function tick() {
+      angleRef.current += speedRef.current;
+      speedRef.current *= DECAY;
+
+      /* tick‑sound când trece pointerul pe altă felie */
+      const slice = FULL_ROT / prizes.length;
+      const idx =
+        Math.floor(((FULL_ROT - (angleRef.current % FULL_ROT)) / slice)) %
+        prizes.length;
+      if (idx !== lastSliceIndexRef.current) {
+        spinSound.play();
+        lastSliceIndexRef.current = idx;
+      }
+
+      draw(ctx);
+
+      if (speedRef.current < 0.003) {
+        cancelAnimationFrame(requestRef.current!);
+        confetti({ spread: 90, particleCount: 160, origin: { y: 0.2 } });
+        winSound.play();
+        setTimeout(onSpinComplete, 500);
+        return;
+      }
+      requestRef.current = requestAnimationFrame(tick);
+    }
+
+    draw(ctx);
+
+    if (isSpinning && selectedPrize) {
+      /* setează viteza iniţială + un mic offset random */
+      const targetIndex = prizes.findIndex(p => p.id === selectedPrize.id);
+      const slice       = FULL_ROT / prizes.length;
+
+      /* rotim astfel încât slice‑ul dorit să ajungă sub pointer */
+      const targetAngle =
+        FULL_ROT - (targetIndex + 0.5) * slice + (Math.random() * slice - slice / 2);
+      angleRef.current = targetAngle - START_SPEED * 45; // „în urmă” ca să poată accelera
+      speedRef.current = START_SPEED;
+      lastSliceIndexRef.current = -1;
+      requestRef.current = requestAnimationFrame(tick);
+    }
+
+    return () => cancelAnimationFrame(requestRef.current!);
+  }, [isSpinning, selectedPrize, prizes]);
+
+  return <canvas ref={canvasRef} className="rounded-full shadow-2xl" />;
 }

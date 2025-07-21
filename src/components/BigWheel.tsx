@@ -82,10 +82,11 @@ export function BigWheel() {
           {currentPrizes.length ? (
             <PrizeWheel
               prizes={currentPrizes}
-              selected={selectedPrize}     // 🔑  denumirile NOI prop‑uri
-              spinning={spinning}
-              onDone={handleSpinComplete}
+              selectedPrize={selectedPrize}         // ✅ denumire corectă
+              isSpinning={spinning}                 // ✅ denumire corectă
+              onSpinComplete={handleSpinComplete}   // ✅ denumire corectă
             />
+
           ) : (
             <Card className="bg-red-500/20 backdrop-blur-sm border-red-500/30">
               <CardContent className="p-8">

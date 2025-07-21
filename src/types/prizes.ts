@@ -21,7 +21,7 @@ export const PRIZES: Prize[] = [
 ];
 
 export const RARITY_COLORS: Record<Rarity, string> = {
-  voucher   : '#6b7280',
+  voucher   : '#3b82f6',
   rare      : '#4ade80',
   epic      : '#8b5cf6',
   legendary : '#facc15',

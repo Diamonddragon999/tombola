@@ -1,14 +1,11 @@
-// src/components/BigWheel.tsx
+// BigWheel.tsx
 import { useEffect, useState, useCallback } from 'react';
-import PrizeWheel          from './PrizeWheel';
-import {QRCodeDisplay  }     from './QRCodeDisplay';
-import {StockTable      }    from './StockTable';
+import PrizeWheel         from './PrizeWheel';
+import { QRCodeDisplay }  from './QRCodeDisplay';
+import { StockTable }     from './StockTable';
 import {
-  getAvailablePrizes,
-  pickPrize,
-  consumePrize,
-  addSpinResult,
-  setSpinning as setSpinningFlag,
+  getAvailablePrizes, pickPrize, consumePrize,
+  addSpinResult, setSpinning as setSpinningFlag,
 } from '@/utils/gameState';
 import { listen, trigger, unlisten } from '@/utils/realtime';
 import { Prize } from '@/types/prizes';
@@ -20,17 +17,13 @@ export default function BigWheel() {
   const [player,   setPlayer]   = useState('');
   const [msg,      setMsg]      = useState('Așteptăm participanți…');
 
-  /* ───── la prima randare încărcăm felii din stock ───── */
+  /* ---------- init & posibil refresh în timp de spin ---------- */
   useEffect(() => {
-    /* ➜ 1️⃣  stock curent */
-    const fresh = getAvailablePrizes();
-
-    /* ➜ 2️⃣  ecranul s‑a reîncărcat în timp ce roata era în curs   */
+    const fresh          = getAvailablePrizes();
     const cachedPrizes   = localStorage.getItem('prizes');
     const cachedSelected = localStorage.getItem('selectedPrize');
 
-    if (cachedPrizes)   setPrizes(JSON.parse(cachedPrizes));
-    else                setPrizes(fresh);
+    setPrizes(cachedPrizes ? JSON.parse(cachedPrizes) : fresh);
 
     if (cachedSelected) {
       setSelected(JSON.parse(cachedSelected));
@@ -39,7 +32,7 @@ export default function BigWheel() {
     }
   }, []);
 
-  /* ───── cerere nouă de la telefon ───── */
+  /* ---------- request din telefon ----------------------------- */
   const handleRequest = useCallback((d: { firstName: string }) => {
     if (spinning) return;
 
@@ -50,9 +43,8 @@ export default function BigWheel() {
     setSpinning(true);
     setSpinningFlag(true);
 
-    /* persistă pentru refresh pe /display */
-    localStorage.setItem('prizes',         JSON.stringify(getAvailablePrizes()));
-    localStorage.setItem('selectedPrize',  JSON.stringify(prize));
+    localStorage.setItem('prizes',        JSON.stringify(getAvailablePrizes()));
+    localStorage.setItem('selectedPrize', JSON.stringify(prize));
   }, [spinning]);
 
   useEffect(() => {
@@ -60,9 +52,9 @@ export default function BigWheel() {
     return () => unlisten('request_spin', handleRequest);
   }, [handleRequest]);
 
-  /* ───── roata a terminat ───── */
+  /* ---------- roata s‑a oprit ------------------------------- */
   const handleDone = async () => {
-    if (!selected) return;                 // TS: aici selected e sigur!
+    if (!selected) return;
 
     consumePrize(selected.id);
     addSpinResult({ prize: selected, firstName: player });
@@ -83,7 +75,7 @@ export default function BigWheel() {
     }, 5_000);
   };
 
-  /* ───── UI ───── */
+  /* ---------- UI ------------------------------------------- */
   const qrUrl = `${window.location.origin}/spin`;
 
   return (

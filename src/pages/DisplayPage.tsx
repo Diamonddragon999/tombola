@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BigWheel } from '../components/BigWheel';
+import BigWheel from '@/components/BigWheel';
 import { PasswordPrompt } from '../components/PasswordPrompt';
 
 const STORAGE_KEY = 'tombola_display_auth';

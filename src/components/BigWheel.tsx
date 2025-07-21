@@ -19,18 +19,16 @@ export default function BigWheel() {
 
   /* init & eventual refresh în timpul spin‑ului */
   useEffect(() => {
-    const fresh          = getAvailablePrizes();
-    const cachedPr       = localStorage.getItem('prizes');
-    const cachedSel      = localStorage.getItem('selectedPrize');
+  const fresh = getAvailablePrizes();
 
-    setPrizes(cachedPr ? JSON.parse(cachedPr) : fresh);
+  const cachedPrizes    = localStorage.getItem('prizes');
+  const cachedSelected  = localStorage.getItem('selectedPrize');
 
-    if (cachedSel) {
-      setSelected(JSON.parse(cachedSel));
-      setSpinning(true);
-      setSpinningFlag(true);
-    }
-  }, []);
+  setPrizes(cachedPrizes ? JSON.parse(cachedPrizes) : fresh);
+  setSelected(cachedSelected ? JSON.parse(cachedSelected) : null);
+  setSpinning(!!cachedSelected);      // ⇦ un singur mod de setare
+  setSpinningFlag(!!cachedSelected);  // flag global sync
+}, []);    
 
   /* request din telefon */
   const handleRequest = useCallback((d: { firstName: string }) => {

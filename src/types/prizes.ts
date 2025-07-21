@@ -5,7 +5,6 @@ export interface Prize {
   name: string;
   rarity: Rarity;
   dailyStock: number;                //  99 999 ⇒ “∞” în UI
-  image?: string; // relativ la /public/
 }
 
 export const UNLIMITED = 99_999;     // folosit în logică + UI

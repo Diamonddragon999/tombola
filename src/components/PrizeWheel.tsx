@@ -1,21 +1,22 @@
+// PrizeWheel.tsx – versiune „minimal‑risk” fără imagini + fără crash
 import { useEffect, useRef } from 'react';
+import { Wheel }  from 'react-custom-roulette';
+import confetti   from 'canvas-confetti';
+import { Howl }   from 'howler';
 import { Prize, RARITY_COLORS } from '@/types/prizes';
-import { Wheel } from 'react-custom-roulette';
-import confetti from 'canvas-confetti';
-import { Howl } from 'howler';
 
-const tick   = new Howl({ src: ['/scroll.mp3'], volume: 0.5 });
-const winner = new Howl({ src: ['/win.mp3'],    volume: 0.9 });
+const tick   = new Howl({ src: ['/scroll.mp3'], volume: .5 });
+const winner = new Howl({ src: ['/win.mp3'],    volume: .9 });
 
 export interface WheelProps {
-  prizes  : Prize[];
-  selected: Prize | null;
-  spinning: boolean;
-  onDone  : () => void;
+  prizes   : Prize[];
+  selected : Prize | null;
+  spinning : boolean;
+  onDone   : () => void;
 }
 
 export default function PrizeWheel(p: WheelProps) {
-  /* ▸ 1. Fără selected ‑‑> placeholder  */
+  /* 1. waiting‑placeholder până primim `selected` */
   if (!p.selected)
     return (
       <div className="text-white text-xl text-center mt-20">
@@ -23,26 +24,23 @@ export default function PrizeWheel(p: WheelProps) {
       </div>
     );
 
-  /* ▸ 2. Asigurăm că premiul ales EXISTĂ în felii           */
-  //  – dacă nu e, îl adăugăm la sfârşit
+  /* 2. asigurăm că premiul ales există în felii */
   let slices = [...p.prizes];
-  let idx    = slices.findIndex(pr => pr.id === p.selected!.id);
-  if (idx === -1) {
-    slices.push(p.selected);          // mutăm referinţa…  
-    idx = slices.length - 1;          // …şi indicele devine valid
+  let idx = p.prizes.findIndex(pr => pr.id === p.selected!.id);
+  if (idx === -1) {           // tocmai a ieşit din stoc ⇒ îl adăugăm
+    slices.push(p.selected);
+    idx = slices.length - 1;
   }
 
-  /* ▸ 3. Construim datele pentru roată din `slices`         */
+  /* 3. pregătim datele pentru roată (FĂRĂ imagini → 0 bug‑uri) */
   const data = slices.map(pr => ({
     option     : pr.name,
     style      : { backgroundColor: RARITY_COLORS[pr.rarity] },
-    image      : pr.image ? { uri: pr.image } : undefined,
-    imageSize  : 40,
     textColors : ['#111'],
   }));
 
-  /* ▸ 4. Sunetul tic‑tic (neschimbat)                       */
-  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  /* 4. sunet tick‑tick */
+  const tickRef = useRef<ReturnType<typeof setInterval>|null>(null);
   useEffect(() => {
     if (p.spinning && !tickRef.current)
       tickRef.current = setInterval(() => tick.play(), 90);
@@ -59,8 +57,8 @@ export default function PrizeWheel(p: WheelProps) {
     p.onDone();
   };
 
-  /* ▸ 5. Wheel fără typings pentru `showImage`              */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  /* 5. rulăm roata (cast‑ul la `any` scoate warnings legate de tipuri) */
+  // eslint‑disable‑next‑line @typescript-eslint/no-explicit-any
   const WheelAny: any = Wheel;
 
   return (
@@ -73,10 +71,7 @@ export default function PrizeWheel(p: WheelProps) {
       radiusLineColor="#1e293b"
       radiusLineWidth={3}
       fontSize={13}
-      showImage
-      imageSize={40}
       onStopSpinning={handleStop}
     />
   );
 }
-

@@ -1,10 +1,6 @@
-/* doar logica formularului */
 import { useEffect, useState } from 'react';
 import { trigger, listen, unlisten } from '@/utils/realtime';
-import {
-  addParticipant,
-  setSpinning,
-} from '@/utils/gameState';
+import { addParticipant, setSpinning } from '@/utils/gameState';
 
 export type JoinData = {
   firstName: string;
@@ -19,30 +15,32 @@ export type JoinData = {
 
 type JoinState = 'idle' | 'waiting' | 'won';
 
+const BYPASS_NAME = 'rov';          // ► “rov” = fără validări / infinit spins
+
 export function useJoinForm() {
   const [data, setData] = useState<JoinData>({
     firstName: '',
-    lastName: '',
-    email: '',
-    age: '',
+    lastName:  '',
+    email:     '',
+    age:       '',
     followsFacebook: false,
     followsInstagram: false,
     followsYoutube: false,
     newsletterConsent: false,
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [state, setState] = useState<JoinState>('idle');
-  const [prizeWon, setPrizeWon] = useState<string>('');
+  const [errors, setErrors]   = useState<Record<string,string>>({});
+  const [state,  setState]    = useState<JoinState>('idle');
+  const [prizeWon, setPrize]  = useState<string>('');
 
-  /* oprire flag local când deschizi pagina */
+  /* când intri pe pagină – oprește flag‑ul local */
   useEffect(() => setSpinning(false), []);
 
-  /* răspuns de la ecranul mare */
+  /* primește rezultat de la ecranul mare */
   useEffect(() => {
     const cb = (d: any) => {
       setSpinning(false);
-      setPrizeWon(d.prize?.name ?? 'Voucher 5 %');
+      setPrize(d.prize?.name ?? 'Voucher 5 %');
       setState('won');
     };
     listen('spin_result', cb);
@@ -51,7 +49,9 @@ export function useJoinForm() {
 
   /* ---------------- VALIDARE ---------------- */
   const validate = () => {
-    const e: Record<string, string> = {};
+    if (data.firstName.trim().toLowerCase() === BYPASS_NAME) return true;
+
+    const e: Record<string,string> = {};
     if (!data.firstName.trim()) e.firstName = 'Prenumele e obligatoriu';
     if (!data.lastName.trim())  e.lastName  = 'Numele e obligatoriu';
     if (!/\S+@\S+\.\S+/.test(data.email)) e.email = 'Email invalid';
@@ -63,21 +63,25 @@ export function useJoinForm() {
     return !Object.keys(e).length;
   };
 
-  /* ---------------- SUBMIT ---------------- */
+  /* ---------------- SUBMIT ------------------ */
   const submit = async () => {
     if (!validate()) return;
 
-    addParticipant({
-      firstName: data.firstName,
-      lastName : data.lastName,
-      email    : data.email,
-      followsSocial:
-        data.followsFacebook || data.followsInstagram || data.followsYoutube,
-      newsletterConsent: data.newsletterConsent,
-    });
+    /* „rov” nu intră în statistici și nu blochează roata */
+    const isBypass = data.firstName.trim().toLowerCase() === BYPASS_NAME;
+    if (!isBypass) {
+      addParticipant({
+        firstName: data.firstName,
+        lastName : data.lastName,
+        email    : data.email,
+        followsSocial:
+          data.followsFacebook || data.followsInstagram || data.followsYoutube,
+        newsletterConsent: data.newsletterConsent,
+      });
+      setSpinning(true);
+      setState('waiting');
+    }
 
-    setSpinning(true);
-    setState('waiting');
     await trigger('request_spin', { firstName: data.firstName });
   };
 

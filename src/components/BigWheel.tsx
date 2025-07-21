@@ -4,11 +4,8 @@ import { StockTable } from './StockTable';
 import { QRCodeDisplay } from './QRCodeDisplay';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  getAvailablePrizes,
-  pickPrize,
-  consumePrize,
-  addSpinResult,
-  setSpinning,
+  getAvailablePrizes, pickPrize, consumePrize,
+  addSpinResult, setSpinning,
 } from '@/utils/gameState';
 import { listen, trigger, unlisten } from '@/utils/realtime';
 import { Prize } from '@/types/prizes';
@@ -16,56 +13,53 @@ import { Prize } from '@/types/prizes';
 export function BigWheel() {
   const [currentPrizes, setCurrentPrizes] = useState<Prize[]>([]);
   const [selectedPrize, setSelectedPrize] = useState<Prize | null>(null);
-  const [isSpinning, setIsSpinning] = useState(false);
+  const [spinning,      setSpinningLocal] = useState(false);
   const [currentPlayer, setCurrentPlayer] = useState('');
-  const [message, setMessage] = useState('Așteptăm participanți…');
+  const [message,       setMessage]       = useState('Așteptăm participanți…');
   const qrUrl = `${window.location.origin}/spin`;
 
-  /* stock iniţial */
+  /* inițial stoc */
   useEffect(() => setCurrentPrizes(getAvailablePrizes()), []);
 
-  /* cerere de la telefon ------------------------------------------- */
+  /* cereri de la telefoane */
   useEffect(() => {
     const cb = (d: any) => {
-      if (isSpinning) return;
-      const prize = pickPrize();
+      if (spinning) return;
 
+      const prize = pickPrize();
       setCurrentPlayer(d.firstName);
       setSelectedPrize(prize);
       setMessage(`${d.firstName} învârte roata…`);
-      setIsSpinning(true);
+      setSpinningLocal(true);
     };
 
     listen('request_spin', cb);
     return () => unlisten('request_spin', cb);
-  }, [isSpinning]);
+  }, [spinning]);
 
-  /* după animaţie --------------------------------------------------- */
+  /* după animație */
   const handleSpinComplete = async () => {
-    if (!selectedPrize) return;         // safety
+    if (!selectedPrize) return;
 
     consumePrize(selectedPrize.id);
     addSpinResult({ prize: selectedPrize, firstName: currentPlayer });
     setMessage(`${currentPlayer} a câștigat: ${selectedPrize.name}!`);
 
-    await trigger('spin_result', {
-      firstName: currentPlayer,
-      prize: selectedPrize,
-    });
+    await trigger('spin_result', { firstName: currentPlayer, prize: selectedPrize });
 
     setCurrentPrizes(getAvailablePrizes());
     setTimeout(resetState, 5000);
   };
 
   function resetState() {
-    setIsSpinning(false);
+    setSpinningLocal(false);
     setSpinning(false);
     setSelectedPrize(null);
     setCurrentPlayer('');
     setMessage('Așteptăm participanți…');
   }
 
-  /* UI -------------------------------------------------------------- */
+  /* ---------------- UI ---------------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex flex-col">
       <div className="p-8 text-center">
@@ -88,9 +82,9 @@ export function BigWheel() {
           {currentPrizes.length ? (
             <PrizeWheel
               prizes={currentPrizes}
-              selectedPrize={selectedPrize}
-              isSpinning={isSpinning}
-              onSpinComplete={handleSpinComplete}
+              selected={selectedPrize}     // 🔑  denumirile NOI prop‑uri
+              spinning={spinning}
+              onDone={handleSpinComplete}
             />
           ) : (
             <Card className="bg-red-500/20 backdrop-blur-sm border-red-500/30">

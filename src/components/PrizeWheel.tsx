@@ -2,15 +2,15 @@
 import { motion } from 'framer-motion';
 import { Prize, RARITY_COLORS } from '@/types/prizes';
 
-type Props = {
+interface Props {
   prizes: Prize[];
-  selectedPrize: Prize | null;
-  isSpinning: boolean;
-  onSpinComplete: () => void;
-};
+  selected: Prize | null;         // schimbat nume => “selected”
+  spinning: boolean;
+  onDone: () => void;
+}
 
 export function PrizeWheel({
-  prizes, selectedPrize, isSpinning, onSpinComplete,
+  prizes, selected, spinning, onDone,
 }: Props) {
   /* ---------- parametri geometrie ---------- */
   const radius   = 200;
@@ -18,8 +18,8 @@ export function PrizeWheel({
   const sliceAng = 360 / prizes.length;
 
   /* ---------- indice premiu ales ----------- */
-  const selIdx = selectedPrize
-    ? prizes.findIndex(p => p.id === selectedPrize.id)
+  const selIdx = selected
+    ? prizes.findIndex(p => p.id === selected.id)
     : -1;
 
   /* dacă n‑am găsit, pointerul rămâne unde este */
@@ -55,9 +55,9 @@ export function PrizeWheel({
 
       <motion.svg
         width={500} height={500} className="relative z-10 drop-shadow-2xl"
-        animate={isSpinning ? { rotate: finalRotation } : {}}
+        animate={spinning ? { rotate: finalRotation } : {}}
         transition={{ duration: 4, ease: [0.25, 0.46, 0.45, 0.94] }}
-        onAnimationComplete={onSpinComplete}
+        onAnimationComplete={onDone}
       >
         <circle cx={center} cy={center} r={radius + 10}
                 fill="#1f2937" stroke="#374151" strokeWidth={3} />

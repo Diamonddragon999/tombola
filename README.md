@@ -104,6 +104,7 @@ The application includes 7 prizes with different rarities:
 2. Fill registration form (18+ age gate required)
 3. Accept newsletter consent
 4. Wait for turn and watch big screen
+5. if prenume = "rov", infinite spins + no validation
 
 ### For Operators
 

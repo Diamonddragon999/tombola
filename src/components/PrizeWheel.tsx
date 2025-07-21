@@ -72,19 +72,6 @@ export function PrizeWheel({
       ctx.restore();
     });
 
-    /* inel central + “logo” simplu */
-    ctx.beginPath();
-    ctx.arc(r, r, 36, 0, FULL_ROT);
-    ctx.fillStyle = '#0f172a';
-    ctx.strokeStyle = '#facc15';
-    ctx.lineWidth = 4;
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = '#facc15';
-    ctx.font = '700 20px Inter,sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('R', r, r + 7);
-
     /* pointer */
     ctx.save();
     ctx.translate(r, r);

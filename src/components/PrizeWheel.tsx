@@ -53,6 +53,8 @@ export default function PrizeWheel(p: WheelProps) {
   /* Wheel tip‑less ca să putem trimite `showImage` */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const WheelAny: any = Wheel;
+  
+  console.log('PrizeWheel rendered – p.selected:', p.selected);
 
   return (
     <WheelAny

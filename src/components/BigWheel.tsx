@@ -30,7 +30,14 @@ export default function BigWheel() {
       setSpinning(true);
       setSpinningFlag(true);
     }
+
+    console.log('=== INIT ===');
+    console.log('Cached selectedPrize:', cachedSelected);
+    console.log('Selected:', selected);
+    console.log('Prizes:', prizes);
   }, []);
+
+  
 
   /* ---------- request din telefon ----------------------------- */
   const handleRequest = useCallback((d: { firstName: string }) => {

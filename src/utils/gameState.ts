@@ -104,3 +104,18 @@ export function addSpinResult(r: Omit<SpinResult, 'timestamp'>) {
   gs.spinResults.push({ ...r, timestamp: Date.now() });
   save(gs);
 }
+
+// la finalul lui gameState.ts
+
+export function exportGameData(): string {
+  const gs = getGameState();
+  const date = new Date().toISOString().split('T')[0];
+  const data = {
+    participants: gs.participants,
+    spinResults: gs.spinResults,
+    stock: gs.remainingStock,
+    totalSpins: gs.totalSpins,
+    date,
+  };
+  return JSON.stringify(data, null, 2);
+}

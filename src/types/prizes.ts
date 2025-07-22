@@ -21,11 +21,12 @@ export const PRIZES: Prize[] = [
 ];
 
 export const RARITY_COLORS: Record<Rarity, string> = {
-  voucher   : '#3b82f6',
-  rare      : '#4ade80',
-  epic      : '#8b5cf6',
-  legendary : '#facc15',
+  voucher   : '#6b7280', // gri – comun
+  rare      : '#60a5fa', // albastru “spălăcit”
+  epic      : '#ef4444', // roșu
+  legendary : '#facc15', // galben
 };
+
 
 export const RARITY_WEIGHTS = {
   voucher   : 44,

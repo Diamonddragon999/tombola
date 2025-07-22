@@ -15,7 +15,7 @@ export function BigWheel() {
   const [selectedPrize, setSelectedPrize] = useState<Prize | null>(null);
   const [spinning,      setSpinningLocal] = useState(false);
   const [currentPlayer, setCurrentPlayer] = useState('');
-  const [message,       setMessage]       = useState('Așteptăm participanți…');
+  const [message,       setMessage]       = useState('Așteptăm primii participanți…');
   const qrUrl = `${window.location.origin}/spin`;
 
   /* inițial stoc */

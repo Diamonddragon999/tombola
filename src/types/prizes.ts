@@ -29,8 +29,8 @@ export const RARITY_COLORS: Record<Rarity, string> = {
 
 
 export const RARITY_WEIGHTS = {
-  voucher   : 44,
-  rare      : 40,
+  voucher   : 54,
+  rare      : 30,
   epic      : 15,
   legendary : 1,
 };

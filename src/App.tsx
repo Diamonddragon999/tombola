@@ -3,6 +3,9 @@ import { SpinPage } from './pages/SpinPage';
 import { DisplayPage } from './pages/DisplayPage';
 import { AdminPage } from './pages/AdminPage';
 import { useEffect } from 'react';
+import RazvanPage from './pages/RazvanPage';
+
+
 
 function App() {
   useEffect(() => {
@@ -19,6 +22,8 @@ function App() {
         <Route path="/spin" element={<SpinPage />} />
         <Route path="/display" element={<DisplayPage />} />
         <Route path="/admin/export" element={<AdminPage />} />
+        <Route path="/razvan" element={<RazvanPage />} />
+
       </Routes>
     </Router>
   );

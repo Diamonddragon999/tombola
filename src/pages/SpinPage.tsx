@@ -1,7 +1,7 @@
-import { JoinForm } from '@/components/joinform';
+  import { JoinForm } from '@/components/joinform';
 
-export function SpinPage() {
-  return (
-    <JoinForm />
-  );
-}
+  export function SpinPage() {
+    return (
+      <JoinForm />
+    );
+  }

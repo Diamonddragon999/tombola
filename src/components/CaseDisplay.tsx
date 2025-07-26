@@ -1,82 +1,124 @@
-import { useEffect, useState, useCallback } from 'react';
+/* src/components/CaseDisplay.tsx */
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { PRIZES, Prize } from '@/types/prizes';
 import {
   pickPrize, consumePrize, addSpinResult, setSpinning,
 } from '@/utils/gameState';
 import { listen, unlisten, trigger } from '@/utils/realtime';
 import { QRCodeDisplay } from './QRCodeDisplay';
-import { StockTable } from './StockTable';
-import CaseOpening from './CaseOpening';
+import { StockTable }    from './StockTable';
+import CaseOpening       from './CaseOpening';
+import { Howl }          from 'howler';
 
-const WIN_MSG_MS = 10000; // 10 sec pe ecran
+/* ---- sunete ---- */
+const tickSnd = new Howl({ src: ['/scroll.mp3'], volume: 0.45 });
+const winSnd  = new Howl({ src: ['/win.mp3'],    volume: 0.9  });
 
 export default function CaseDisplay() {
   const [selected, setSel]  = useState<Prize | null>(null);
   const [rolling,  setRoll] = useState(false);
   const [msg,      setMsg]  = useState('Așteptăm participanți…');
+  const [player,   setPl]   = useState('');
 
   const qrUrl = `${window.location.origin}/spin`;
+  const tickTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleRequest = useCallback(async (d: { firstName: string }) => {
+  /* pornește / oprește ticurile */
+  const startTicks = () => {
+    stopTicks();
+    tickTimer.current = setInterval(() => tickSnd.play(), 85); // ~12Hz
+  };
+  const stopTicks = () => {
+    if (tickTimer.current) {
+      clearInterval(tickTimer.current);
+      tickTimer.current = null;
+    }
+  };
+
+  /* request de pe telefon */
+  const handleRequest = useCallback((d: { firstName: string }) => {
     if (rolling) return;
-
     const prize = pickPrize();
+
+    setPl(d.firstName);
     setSel(prize);
     setMsg(`${d.firstName} deschide cutia…`);
     setRoll(true);
     setSpinning(true);
-
-    await new Promise(r => setTimeout(r, 3300)); // animație
-
-    consumePrize(prize.id);
-    addSpinResult({ prize, firstName: d.firstName });
-    setMsg(`Felicitări! ${d.firstName} a câștigat ${prize.name}! 🎉`);
-
-    await trigger('spin_result', { firstName: d.firstName, prize });
-
-    setTimeout(() => {
-      setRoll(false);
-      setSpinning(false);
-      setSel(null);
-      setMsg('Așteptăm participanți…');
-    }, WIN_MSG_MS);
+    startTicks();
   }, [rolling]);
 
   useEffect(() => {
     listen('request_spin', handleRequest);
-    return () => unlisten('request_spin', handleRequest);
+    return () => {
+      unlisten('request_spin', handleRequest);
+      stopTicks();
+      if (resetTimer.current) clearTimeout(resetTimer.current);
+    };
   }, [handleRequest]);
 
-  return (
-    <div className="w-full max-w-[1500px] grid grid-cols-1 xl:grid-cols-[320px_1fr_420px] gap-10 items-start">
-      {/* QR */}
-      <div className="glass neon-blue p-6">
-        <QRCodeDisplay url={qrUrl} size={240} />
-      </div>
+  /* când animația s-a terminat în <CaseOpening> */
+  const handleDone = async () => {
+    stopTicks();
+    winSnd.play();
 
-      {/* cutie + mesaj */}
-      <div className="flex flex-col items-center">
+    if (!selected) return;
+
+    consumePrize(selected.id);
+    addSpinResult({ prize: selected, firstName: player });
+    setMsg(`Felicitări! ${player} a câștigat ${selected.name}! 🎉`);
+
+    await trigger('spin_result', { firstName: player, prize: selected });
+
+    /* ținem mesajul mai mult (8s) */
+    resetTimer.current = setTimeout(() => {
+      setRoll(false);
+      setSpinning(false);
+      setSel(null);
+      setPl('');
+      setMsg('Așteptăm participanți…');
+    }, 8000);
+  };
+
+  /* UI */
+  return (
+    <div className="relative flex flex-col items-center">
+      {/* HEADER */}
+      <header className="w-full max-w-7xl mx-auto flex flex-col items-center mt-6 mb-8">
         <img
           src="https://rovision.ro/wp-content/themes/storefront-child/rovision-logo.svg"
           alt="Rovision"
-          className="h-20 mb-6 drop-shadow-[0_0_20px_rgba(255,255,255,.35)]"
+          className="h-20 mb-3 drop-shadow-lg"
         />
+        <h1 className="text-white text-4xl font-extrabold drop-shadow-md tracking-wide mb-1">
+          Ruleta norocului
+        </h1>
+        <p className="text-white text-2xl font-semibold text-center px-4">{msg}</p>
+      </header>
 
-        <p className="text-2xl font-semibold text-white mb-6 text-center drop-shadow-[0_0_8px_rgba(0,0,0,.5)]">
-          {msg}
-        </p>
+      {/* MAIN AREA */}
+      <div className="w-full max-w-7xl mx-auto flex flex-col items-center gap-10">
+        {/* Ruleta mare pe centru */}
+        <div className="w-full flex justify-center">
+          <CaseOpening
+            prizes={PRIZES}
+            selected={selected}
+            rolling={rolling}
+            onDone={handleDone}
+          />
+        </div>
 
-        <CaseOpening
-          prizes={PRIZES}
-          selected={selected}
-          rolling={rolling}
-          onDone={()=>{}}
-        />
+        {/* Tabel mare dedesubt */}
+        <section className="w-full max-w-6xl mx-auto mt-10 px-4">
+          <StockTable />
+        </section>
       </div>
 
-      {/* Tabel stoc */}
-      <div className="glass neon-violet p-6 max-h-[80vh] overflow-auto">
-        <StockTable />
+      {/* QR în dreapta, poziționat fix / vizibil mereu */}
+      <div className="fixed right-8 top-24 z-30">
+        {/* Ajustează px după nevoie (tipul prop-ului este px) */}
+        <QRCodeDisplay url={qrUrl} px={320} />
       </div>
     </div>
   );

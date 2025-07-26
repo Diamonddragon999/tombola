@@ -1,28 +1,26 @@
 import { useEffect, useState } from 'react';
 import { BigWheel } from '@/components/BigWheel';
-import { PasswordPrompt } from '../components/PasswordPrompt';
+import { PasswordPrompt } from '@/components/PasswordPrompt';
 
 const STORAGE_KEY = 'tombola_display_auth';
 
 export function DisplayPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuth, setAuth] = useState(false);
 
-  /* la prima randare verifică dacă există token-ul */
   useEffect(() => {
-    if (localStorage.getItem(STORAGE_KEY) === 'ok') {
-      setIsAuthenticated(true);
-    }
+    if (localStorage.getItem(STORAGE_KEY) === 'ok') setAuth(true);
   }, []);
 
-  /* callback după introducerea parolei corecte */
   const handleAuth = () => {
     localStorage.setItem(STORAGE_KEY, 'ok');
-    setIsAuthenticated(true);
+    setAuth(true);
   };
 
-  if (!isAuthenticated) {
-    return <PasswordPrompt onCorrectPassword={handleAuth} />;
-  }
+  if (!isAuth) return <PasswordPrompt onCorrectPassword={handleAuth} />;
 
-  return <BigWheel />;
+  return (
+    <div className="min-h-screen bg-premium scanlines flex items-center justify-center p-6">
+      <BigWheel />
+    </div>
+  );
 }

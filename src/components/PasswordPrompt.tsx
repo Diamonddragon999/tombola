@@ -11,51 +11,41 @@ interface PasswordPromptProps {
 
 export function PasswordPrompt({ onCorrectPassword }: PasswordPromptProps) {
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [err, setErr] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (password === 'festival2025') {
-      onCorrectPassword();
-    } else {
-      setError('Parolă incorectă!');
-      setPassword('');
-    }
+    if (password === 'festival2025') onCorrectPassword();
+    else { setErr('Parolă incorectă!'); setPassword(''); }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white/10 backdrop-blur-sm border-white/20">
+    <div className="min-h-screen bg-premium scanlines flex items-center justify-center p-4">
+      <Card className="glass neon-red w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-center text-2xl text-white flex items-center justify-center gap-2 font-bold">
+          <CardTitle className="text-center text-2xl text-white flex items-center justify-center gap-2 font-orbitron font-bold">
             <Lock className="h-6 w-6" />
             Acces Restricționat
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Input
-                type="password"
-                placeholder="Introdu parola"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-yellow-400 focus:ring-yellow-400"
-                autoFocus
-              />
-            </div>
-            
-            {error && (
+          <form onSubmit={submit} className="space-y-4">
+            <Input
+              type="password"
+              placeholder="Introdu parola"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-yellow-400 focus:ring-yellow-400"
+              autoFocus
+            />
+
+            {err && (
               <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{err}</AlertDescription>
               </Alert>
             )}
-            
-            <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold"
-            >
+
+            <Button type="submit" className="btn-primary w-full">
               Acces
             </Button>
           </form>

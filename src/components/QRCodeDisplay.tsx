@@ -1,26 +1,27 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 
-interface QRCodeDisplayProps {
+export interface QRCodeDisplayProps {
   url: string;
-  px?: number;
+  px?: number;         // <-- dimensiune în px (default 280)
 }
 
-export function QRCodeDisplay({ url, px = 320 }: QRCodeDisplayProps) {
-  const [qrCodeUrl, setQrCodeUrl] = useState('');
+export function QRCodeDisplay({ url, px = 280 }: QRCodeDisplayProps) {
+  const [qr, setQr] = useState<string>('');
 
   useEffect(() => {
-    QRCode.toDataURL(url, { width: px, margin: 2 }).then(setQrCodeUrl);
+    QRCode.toDataURL(url, { width: px, margin: 2 }).then(setQr);
   }, [url, px]);
 
   return (
-    <div className="glass neon-violet p-6 flex flex-col items-center max-w-fit">
-      <p className="text-xl font-bold mb-4 text-white drop-shadow">Scanează pentru a te înscrie!</p>
-      {qrCodeUrl && (
+    <div className="glass p-4 rounded-xl shadow-xl flex flex-col items-center">
+      <p className="text-white/90 font-bold mb-3 drop-shadow">Scanează pentru a te înscrie!</p>
+      {qr && (
         <img
-          src={qrCodeUrl}
+          src={qr}
           alt="QR Code"
-          className="rounded-lg shadow-[0_0_24px_rgba(255,255,255,.25)] bg-white p-3"
+          style={{ width: px }}
+          className="rounded-lg bg-white p-2 shadow-[0_0_32px_rgba(255,255,255,.15)]"
         />
       )}
     </div>

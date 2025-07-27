@@ -74,7 +74,7 @@ export function BigWheel() {
       <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-8 px-8">
         <div className="lg:flex-1 flex justify-center">
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-            <QRCodeDisplay url={qrUrl} px={250} />
+            <QRCodeDisplay url={qrUrl} px={220} />
           </div>
         </div>
 

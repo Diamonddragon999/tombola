@@ -1,45 +1,45 @@
-import { useEffect, useState, useCallback } from 'react';
+/* src/components/CaseDisplay.tsx */
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { PRIZES, Prize } from '@/types/prizes';
 import {
   pickPrize, consumePrize, addSpinResult, setSpinning,
 } from '@/utils/gameState';
 import { listen, unlisten, trigger } from '@/utils/realtime';
 import { QRCodeDisplay } from './QRCodeDisplay';
-import { StockTable } from './StockTable';
-import CaseOpening from './CaseOpening';
+import { StockTable }    from './StockTable';
+import CaseOpening       from './CaseOpening';
+import { Howl }          from 'howler';
 
-const WIN_MSG_MS = 10000; // 10 sec pe ecran
+const tickSnd = new Howl({ src: ['/scroll.mp3'], volume: 0.45 });
+const winSnd  = new Howl({ src: ['/win.mp3'],    volume: 0.9  });
 
 export default function CaseDisplay() {
   const [selected, setSel]  = useState<Prize | null>(null);
   const [rolling,  setRoll] = useState(false);
   const [msg,      setMsg]  = useState('Așteptăm participanți…');
-
+  const [player,   setPl]   = useState('');
   const qrUrl = `${window.location.origin}/spin`;
 
-  const handleRequest = useCallback(async (d: { firstName: string }) => {
-    if (rolling) return;
+  const tickTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const startTicks = () => {
+    stopTicks();
+    tickTimer.current = setInterval(() => tickSnd.play(), 90);
+  };
+  const stopTicks = () => {
+    if (tickTimer.current) { clearInterval(tickTimer.current); tickTimer.current = null; }
+  };
+
+  const handleRequest = useCallback((d: { firstName: string }) => {
+    if (rolling) return;
     const prize = pickPrize();
+
+    setPl(d.firstName);
     setSel(prize);
     setMsg(`${d.firstName} deschide cutia…`);
     setRoll(true);
     setSpinning(true);
-
-    await new Promise(r => setTimeout(r, 3300)); // animație
-
-    consumePrize(prize.id);
-    addSpinResult({ prize, firstName: d.firstName });
-    setMsg(`Felicitări! ${d.firstName} a câștigat ${prize.name}! 🎉`);
-
-    await trigger('spin_result', { firstName: d.firstName, prize });
-
-    setTimeout(() => {
-      setRoll(false);
-      setSpinning(false);
-      setSel(null);
-      setMsg('Așteptăm participanți…');
-    }, WIN_MSG_MS);
+    startTicks();
   }, [rolling]);
 
   useEffect(() => {
@@ -47,37 +47,61 @@ export default function CaseDisplay() {
     return () => unlisten('request_spin', handleRequest);
   }, [handleRequest]);
 
+  const handleDone = async () => {
+    stopTicks();
+    winSnd.play();
+
+    if (!selected) return;
+
+    consumePrize(selected.id);
+    addSpinResult({ prize: selected, firstName: player });
+    setMsg(`Felicitări! ${player} a câștigat ${selected.name}! 🎉`);
+
+    await trigger('spin_result', { firstName: player, prize: selected });
+
+    setTimeout(() => {
+      setRoll(false);
+      setSpinning(false);
+      setSel(null);
+      setPl('');
+      setMsg('Așteptăm participanți…');
+    }, 6000);
+  };
+
   return (
-    <div className="w-full max-w-[1500px] grid grid-cols-1 xl:grid-cols-[320px_1fr_420px] gap-10 items-start">
-      {/* QR */}
-      <div className="glass neon-blue p-6">
-        <QRCodeDisplay url={qrUrl} size={240} />
-      </div>
+    <div className="bg-premium min-h-screen w-full overflow-x-hidden flex flex-col items-center pb-24">
+      {/* HEADER */}
+      <header className="w-full max-w-[1920px] mx-auto px-10 pt-10 flex flex-col items-center gap-4">
+        <div className="flex items-center gap-6">
+          <img
+            src="https://rovision.ro/wp-content/themes/storefront-child/rovision-logo.svg"
+            alt="Rovision"
+            className="h-[110px]"
+          />
+          <h1 className="text-white text-6xl font-extrabold">Tombola norocului</h1>
+        </div>
+        <p className="text-white text-3xl font-semibold drop-shadow-md">{msg}</p>
+      </header>
 
-      {/* cutie + mesaj */}
-      <div className="flex flex-col items-center">
-        <img
-          src="https://rovision.ro/wp-content/themes/storefront-child/rovision-logo.svg"
-          alt="Rovision"
-          className="h-20 mb-6 drop-shadow-[0_0_20px_rgba(255,255,255,.35)]"
-        />
-
-        <p className="text-2xl font-semibold text-white mb-6 text-center drop-shadow-[0_0_8px_rgba(0,0,0,.5)]">
-          {msg}
-        </p>
-
+      {/* RULETĂ + QR */}
+      <section className="w-full max-w-[1920px] px-10 mt-12 flex flex-col items-center relative">
         <CaseOpening
           prizes={PRIZES}
           selected={selected}
           rolling={rolling}
-          onDone={()=>{}}
+          onDone={handleDone}
         />
-      </div>
 
-      {/* Tabel stoc */}
-      <div className="glass neon-violet p-6 max-h-[80vh] overflow-auto">
+        {/* QR: lipit de marginea dreapta, mai mare */}
+        <div className="hidden lg:block fixed right-6 top-1/2 -translate-y-1/2 z-30">
+          <QRCodeDisplay url={qrUrl} px={420} />
+        </div>
+      </section>
+
+      {/* TABEL DEDESUBT */}
+      <section className="w-full max-w-[1920px] px-10">
         <StockTable />
-      </div>
+      </section>
     </div>
   );
 }

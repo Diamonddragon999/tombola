@@ -28,22 +28,19 @@
 
 /* ---------- UTIL ---------- */
 @layer utilities{
-  /* Gradient din poză (blue -> purple, ușor “cald” la final) */
   .bg-premium{
-    background:
-      linear-gradient(145deg,#2f6ff0 0%,#3b5fe6 15%,#4a3ddc 45%,#5a2ad6 65%,#6a2bdc 85%,#7c2dd1 100%);
+    background: linear-gradient(145deg,#2f6ff0 0%,#3b5fe6 18%,#4a3ddc 47%,#5a2ad6 68%,#6a2bdc 86%,#7c2dd1 100%);
   }
-
   .glass       {@apply bg-white/10 backdrop-blur-md border-white/20 rounded-2xl;}
   .neon-yellow {box-shadow:0 0 26px rgba(250,204,21,.38);}
-  .neon-blue   {box-shadow:0 0 26px rgba(59,95,230,.35);}
-  .neon-violet {box-shadow:0 0 26px rgba(122,45,220,.35);}
+  .neon-violet {box-shadow:0 0 26px rgba(122,45,220,.38);}
   .win-pulse   {animation:glowPulse 1.2s ease-in-out infinite;}
+  .slot-3d     {transform:perspective(600px) rotateX(6deg);}
 
   @keyframes glowPulse{
     0%,100%{box-shadow:0 0 14px rgba(250,204,21,.4);}
     50%    {box-shadow:0 0 34px rgba(250,204,21,.95);}
   }
 
-  .slot-3d{transform:perspective(600px) rotateX(6deg);}
+  .border-6 { border-width: 6px; } /* Tailwind nu are 6px default */
 }

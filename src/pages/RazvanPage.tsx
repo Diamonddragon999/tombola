@@ -1,3 +1,4 @@
+//src/pages/razvanpage.tsx
 import { useEffect, useState } from 'react';
 import { PasswordPrompt } from '@/components/PasswordPrompt';
 import CaseDisplay from '@/components/CaseDisplay';

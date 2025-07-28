@@ -1,14 +1,11 @@
-/* src/components/CaseDisplay.tsx */
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { PRIZES, Prize } from '@/types/prizes';
-import {
-  pickPrize, consumePrize, addSpinResult, setSpinning,
-} from '@/utils/gameState';
+import { pickPrize, consumePrize, addSpinResult, setSpinning } from '@/utils/gameState';
 import { listen, unlisten, trigger } from '@/utils/realtime';
 import { QRCodeDisplay } from './QRCodeDisplay';
-import { StockTable }    from './StockTable';
-import CaseOpening       from './CaseOpening';
-import { Howl }          from 'howler';
+import { StockTable } from './StockTable';
+import CaseOpening from './CaseOpening';
+import { Howl } from 'howler';
 
 const tickSnd = new Howl({ src: ['/scroll.mp3'], volume: 0.45 });
 const winSnd  = new Howl({ src: ['/win.mp3'],    volume: 0.9  });
@@ -69,22 +66,22 @@ export default function CaseDisplay() {
   };
 
   return (
-    <div className="bg-premium min-h-screen w-full overflow-x-hidden flex flex-col items-center pb-24">
+    <div className="bg-premium min-h-screen w-full overflow-x-hidden flex flex-col items-center pb-16">
       {/* HEADER */}
-      <header className="w-full max-w-[1920px] mx-auto px-10 pt-10 flex flex-col items-center gap-4">
-        <div className="flex items-center gap-6">
-          <img
-            src="https://rovision.ro/wp-content/themes/storefront-child/rovision-logo.svg"
-            alt="Rovision"
-            className="h-[110px]"
-          />
-          <h1 className="text-white text-6xl font-extrabold">Tombola norocului</h1>
-        </div>
-        <p className="text-white text-3xl font-semibold drop-shadow-md">{msg}</p>
+      <header className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-10 pt-6 sm:pt-10 flex flex-col items-center gap-3 sm:gap-4 text-center">
+        <img
+          src="https://rovision.ro/wp-content/themes/storefront-child/rovision-logo.svg"
+          alt="Rovision"
+          className="h-16 sm:h-24 lg:h-28"
+        />
+        <h1 className="text-white font-extrabold text-3xl sm:text-4xl lg:text-5xl">
+          Tombola norocului
+        </h1>
+        <p className="text-white drop-shadow-md text-lg sm:text-2xl font-semibold">{msg}</p>
       </header>
 
       {/* RULETĂ + QR */}
-      <section className="w-full max-w-[1920px] px-10 mt-12 flex flex-col items-center relative">
+      <section className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-10 mt-8 sm:mt-12 flex flex-col items-center relative">
         <CaseOpening
           prizes={PRIZES}
           selected={selected}
@@ -92,14 +89,17 @@ export default function CaseDisplay() {
           onDone={handleDone}
         />
 
-        {/* QR: lipit de marginea dreapta, mai mare */}
+        {/* QR – mare pe desktop, jos pe mobile */}
         <div className="hidden lg:block fixed right-6 top-1/2 -translate-y-1/2 z-30">
-          <QRCodeDisplay url={qrUrl} px={420} />
+          <QRCodeDisplay url={qrUrl} px={360} />
+        </div>
+        <div className="lg:hidden mt-8">
+          <QRCodeDisplay url={qrUrl} px={220} />
         </div>
       </section>
 
-      {/* TABEL DEDESUBT */}
-      <section className="w-full max-w-[1920px] px-10">
+      {/* TABEL */}
+      <section className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-10 mt-12 sm:mt-16">
         <StockTable />
       </section>
     </div>

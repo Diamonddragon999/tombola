@@ -20,9 +20,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/spin" replace />} />
         <Route path="/spin" element={<SpinPage />} />
-        <Route path="/display" element={<DisplayPage />} />
-        <Route path="/admin/export" element={<AdminPage />} />
-        <Route path="/razvan" element={<RazvanPage />} />
+        <Route path="/roata-veche" element={<DisplayPage />} />
+        <Route path="/admin/" element={<AdminPage />} />
+        <Route path="/display" element={<RazvanPage />} />
 
       </Routes>
     </Router>

@@ -19,10 +19,10 @@ export default function JoinFormUI() {
   // you can leave this wrapper here
   if (state !== 'idle')
     return (
-      <div className="min-h-screen flex items-center justify-center 
-                      bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900
-                      p-4">
-        <Card className="w-full max-w-md bg-white/10 backdrop-blur-sm border border-white/20 p-6">
+ <div className="min-h-screen flex items-center justify-center 
+                 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900
+                 p-4">
+        <Card className="w-full max-w-lg bg-gray-900/50 backdrop-blur-sm border border-white/20 p-6">
           <CardHeader>
             <CardTitle className="text-2xl text-white text-center">
               {state === 'waiting'

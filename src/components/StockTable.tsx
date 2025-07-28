@@ -10,13 +10,13 @@ export function StockTable() {
   const fmt = (n: number) => (n >= UNLIMITED ? '∞' : n);
 
   return (
-    <Card className="w-full mx-auto glass neon-violet text-base sm:text-lg lg:text-2xl">
+    <Card className="w-full mx-auto glass neon-violet text-sm sm:text-base lg:text-lg">
       <CardHeader>
-        <CardTitle className="text-white text-center text-2xl sm:text-3xl lg:text-4xl font-extrabold">
+        <CardTitle className="text-white text-center f-h2 font-extrabold">
           Stoc Premii – {gs.day}
         </CardTitle>
       </CardHeader>
-      <CardContent className="overflow-x-auto pb-6 sm:pb-10">
+      <CardContent className="overflow-x-auto pb-6">
         <Table className="w-full">
           <TableHeader>
             <TableRow className="text-white/80">
@@ -35,7 +35,7 @@ export function StockTable() {
                   <TableCell className="text-white">{p.name}</TableCell>
                   <TableCell>
                     <span
-                      className="px-4 py-0.5 rounded-full text-black font-bold text-xs sm:text-sm shadow-lg uppercase"
+                      className="px-3 py-0.5 rounded-full text-black font-bold text-[10px] sm:text-xs shadow-lg uppercase"
                       style={{ background: RARITY_COLORS[p.rarity] }}
                     >
                       {p.rarity}
@@ -49,7 +49,7 @@ export function StockTable() {
           </TableBody>
         </Table>
 
-        <div className="mt-6 sm:mt-10 text-center text-gray-200 space-y-1 sm:space-y-2 text-sm sm:text-base lg:text-xl">
+        <div className="mt-6 text-center text-gray-200 space-y-1 text-xs sm:text-sm lg:text-base">
           <p>Total rotiri astăzi: {gs.totalSpins}</p>
           <p>Participanți: {gs.participants.length}</p>
         </div>

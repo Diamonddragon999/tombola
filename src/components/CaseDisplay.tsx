@@ -66,22 +66,20 @@ export default function CaseDisplay() {
   };
 
   return (
-    <div className="bg-premium min-h-screen w-full overflow-x-hidden flex flex-col items-center pb-16">
+    <div className="bg-premium min-h-screen w-full overflow-x-hidden flex flex-col items-center pb-16 tv-scale">
       {/* HEADER */}
-      <header className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-10 pt-6 sm:pt-10 flex flex-col items-center gap-3 sm:gap-4 text-center">
+      <header className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-10 pt-6 sm:pt-10 flex flex-col items-center gap-2 sm:gap-3 text-center">
         <img
           src="https://rovision.ro/wp-content/themes/storefront-child/rovision-logo.svg"
           alt="Rovision"
-          className="h-16 sm:h-24 lg:h-28"
+          className="h-14 sm:h-20 lg:h-24"
         />
-        <h1 className="text-white font-extrabold text-3xl sm:text-4xl lg:text-5xl">
-          Tombola norocului
-        </h1>
-        <p className="text-white drop-shadow-md text-lg sm:text-2xl font-semibold">{msg}</p>
+        <h1 className="f-h1 font-extrabold text-white">Tombola norocului</h1>
+        <p className="f-h3 text-white drop-shadow-md font-semibold">{msg}</p>
       </header>
 
       {/* RULETĂ + QR */}
-      <section className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-10 mt-8 sm:mt-12 flex flex-col items-center relative">
+      <section className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-10 mt-6 sm:mt-10 flex flex-col items-center relative">
         <CaseOpening
           prizes={PRIZES}
           selected={selected}
@@ -89,17 +87,17 @@ export default function CaseDisplay() {
           onDone={handleDone}
         />
 
-        {/* QR – mare pe desktop, jos pe mobile */}
+        {/* QR mare pe desktop, jos pe mobile */}
         <div className="hidden lg:block fixed right-6 top-1/2 -translate-y-1/2 z-30">
-          <QRCodeDisplay url={qrUrl} px={360} />
+          <QRCodeDisplay url={qrUrl} px={300} />
         </div>
-        <div className="lg:hidden mt-8">
-          <QRCodeDisplay url={qrUrl} px={220} />
+        <div className="lg:hidden mt-6">
+          <QRCodeDisplay url={qrUrl} px={180} />
         </div>
       </section>
 
       {/* TABEL */}
-      <section className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-10 mt-12 sm:mt-16">
+      <section className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-10 mt-10 sm:mt-14">
         <StockTable />
       </section>
     </div>

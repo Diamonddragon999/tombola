@@ -1,4 +1,3 @@
-//src/pages/razvanpage.tsx
 import { useEffect, useState } from 'react';
 import { PasswordPrompt } from '@/components/PasswordPrompt';
 import CaseDisplay from '@/components/CaseDisplay';
@@ -23,9 +22,6 @@ export default function RazvanPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-premium flex items-center justify-center p-8">
-      <CaseDisplay />
-    </div>
-  );
+  // NU mai înfășura cu alt min-h-screen/p-8; CaseDisplay se ocupă
+  return <CaseDisplay />;
 }

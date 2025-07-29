@@ -16,7 +16,7 @@ export function QRCodeDisplay({ url, px = 280 }: QRCodeDisplayProps) {
 
   return (
     <div className="glass p-4 rounded-xl shadow-xl flex flex-col items-center">
-      <p className="text-white/90 font-bold mb-3 drop-shadow">Scanează pentru a te înscrie!</p>
+      <p className="text-white/90 font-bold mb-4 text-base sm:text-lg lg:text-xl">Scanează pentru a te înscrie!</p>
       {qr && (
         <img
           src={qr}

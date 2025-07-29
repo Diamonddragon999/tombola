@@ -1,3 +1,4 @@
+//src/components/stocktable.tsx
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
@@ -10,7 +11,7 @@ export function StockTable() {
   const fmt = (n: number) => (n >= UNLIMITED ? '∞' : n);
 
   return (
-    <Card className="w-full mx-auto glass neon-violet text-sm sm:text-base lg:text-lg">
+    <Card className="w-full mx-auto glass neon-violet text-base lg:text-lg xl:text-xl">
       <CardHeader>
         <CardTitle className="text-white text-center f-h2 font-extrabold">
           Stoc Premii – {gs.day}
@@ -20,10 +21,10 @@ export function StockTable() {
         <Table className="w-full">
           <TableHeader>
             <TableRow className="text-white/80">
-              <TableHead className="text-white font-bold">Premiu</TableHead>
-              <TableHead className="text-white font-bold">Raritate</TableHead>
-              <TableHead className="text-white font-bold">Rămas</TableHead>
-              <TableHead className="text-white font-bold">Inițial</TableHead>
+              <TableHead className="text-white f-h3">Premiu</TableHead>
+              <TableHead className="text-white f-h3">Raritate</TableHead>
+              <TableHead className="text-white f-h3">Rămas</TableHead>
+              <TableHead className="text-white f-h3">Inițial</TableHead>
             </TableRow>
           </TableHeader>
 

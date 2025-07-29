@@ -9,14 +9,14 @@ import CaseOpening from './CaseOpening';
 import { Howl } from 'howler';
 
 const tickSnd = new Howl({ src: ['/scroll.mp3'], volume: 0.45 });
-const winSnd  = new Howl({ src: ['/win.mp3'],    volume: 0.9  });
+const winSnd = new Howl({ src: ['/win.mp3'], volume: 0.9 });
 const handleTick = () => tickSnd.play(); // fără setInterval
 
 export default function CaseDisplay() {
-  const [selected, setSel]  = useState<Prize | null>(null);
-  const [rolling,  setRoll] = useState(false);
-  const [msg,      setMsg]  = useState('Așteptăm participanți…');
-  const [player,   setPl]   = useState('');
+  const [selected, setSel] = useState<Prize | null>(null);
+  const [rolling, setRoll] = useState(false);
+  const [msg, setMsg] = useState('Așteptăm participanți…');
+  const [player, setPl] = useState('');
   const qrUrl = `${window.location.origin}/spin`;
 
   const tickTimer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -70,16 +70,26 @@ export default function CaseDisplay() {
   return (
     <div className="bg-premium min-h-screen w-full overflow-x-hidden flex flex-col items-center pb-16 tv-scale-xs">
       {/* HEADER */}
-      <header className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-10 pt-6 sm:pt-10 flex flex-col items-center gap-2 sm:gap-3 text-center">
+      <header className="w-full max-w-screen-xl mx-auto px-6 lg:px-12 py-6 flex items-center justify-between gap-6">
+        {/* logo */}
         <img
           src="https://rovision.ro/wp-content/themes/storefront-child/rovision-logo.svg"
           alt="Rovision"
-          className="h-14 sm:h-20 lg:h-24"
+          className="h-10 sm:h-14 lg:h-20 drop-shadow-lg"
         />
-        <h1 className="f-h1 font-extrabold text-white tracking-tight">Tombola norocului</h1>
-        <p className="f-h3 text-white/90 font-medium">{msg}</p>
-      </header>
 
+        <h1 className="text-white font-extrabold tracking-tight
+                   text-xl sm:text-2xl lg:text-3xl text-center">
+      Tombola Norocului – Young Festival
+    </h1>
+
+        {/* titlu nou */}
+        <p className="mt-4 text-white/90 font-medium text-base sm:text-lg lg:text-xl text-center">
+          {msg}
+        </p>
+        
+      </header>
+      
       {/* RULETĂ + QR */}
       <section className="w-full max-w-screen-xl px-4 sm:px-6 lg:px-10 mt-6 sm:mt-10 flex flex-col items-center relative">
         <CaseOpening
@@ -90,11 +100,13 @@ export default function CaseDisplay() {
           onTick={handleTick}
         />
 
-        {/* QR mare pe desktop, jos pe mobile */}
-        <div className="hidden lg:block fixed right-6 top-1/2 -translate-y-1/2 z-30">
-          <QRCodeDisplay url={qrUrl} px={200} />
+        {/* QR – desktop */}
+        <div className="hidden lg:block fixed bottom-6 right-6 z-30">
+          <QRCodeDisplay url={qrUrl} px={220} />   {/* ușor mai mic */}
         </div>
-        <div className="lg:hidden mt-6">
+
+        {/* QR – mobile/tablet (centru sub ruletă) */}
+        <div className="lg:hidden mt-8">
           <QRCodeDisplay url={qrUrl} px={180} />
         </div>
       </section>

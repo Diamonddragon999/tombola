@@ -1,3 +1,4 @@
+//src/components/CaseDisplay.tsx
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { PRIZES, Prize } from '@/types/prizes';
 import { pickPrize, consumePrize, addSpinResult, setSpinning } from '@/utils/gameState';
@@ -9,6 +10,7 @@ import { Howl } from 'howler';
 
 const tickSnd = new Howl({ src: ['/scroll.mp3'], volume: 0.45 });
 const winSnd  = new Howl({ src: ['/win.mp3'],    volume: 0.9  });
+const handleTick = () => tickSnd.play(); // fără setInterval
 
 export default function CaseDisplay() {
   const [selected, setSel]  = useState<Prize | null>(null);
@@ -66,7 +68,7 @@ export default function CaseDisplay() {
   };
 
   return (
-    <div className="bg-premium min-h-screen w-full overflow-x-hidden flex flex-col items-center pb-16 tv-scale">
+    <div className="bg-premium min-h-screen w-full overflow-x-hidden flex flex-col items-center pb-16 tv-scale-xs">
       {/* HEADER */}
       <header className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-10 pt-6 sm:pt-10 flex flex-col items-center gap-2 sm:gap-3 text-center">
         <img
@@ -74,8 +76,8 @@ export default function CaseDisplay() {
           alt="Rovision"
           className="h-14 sm:h-20 lg:h-24"
         />
-        <h1 className="f-h1 font-extrabold text-white">Tombola norocului</h1>
-        <p className="f-h3 text-white drop-shadow-md font-semibold">{msg}</p>
+        <h1 className="f-h1 font-extrabold text-white tracking-tight">Tombola norocului</h1>
+        <p className="f-h3 text-white/90 font-medium">{msg}</p>
       </header>
 
       {/* RULETĂ + QR */}
@@ -85,11 +87,12 @@ export default function CaseDisplay() {
           selected={selected}
           rolling={rolling}
           onDone={handleDone}
+          onTick={handleTick}
         />
 
         {/* QR mare pe desktop, jos pe mobile */}
         <div className="hidden lg:block fixed right-6 top-1/2 -translate-y-1/2 z-30">
-          <QRCodeDisplay url={qrUrl} px={300} />
+          <QRCodeDisplay url={qrUrl} px={200} />
         </div>
         <div className="lg:hidden mt-6">
           <QRCodeDisplay url={qrUrl} px={180} />

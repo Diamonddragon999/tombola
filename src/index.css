@@ -57,6 +57,11 @@ html{
 
   /* Scale globală dacă vrei să micșorezi totul rapid */
   .tv-scale { font-size: 1rem; } /* override root clamp if needed */
+
+  .card-shadow   { box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+  .win-pulse     { animation: glowPulse 1.2s ease-in-out infinite; }
+  .tv-scale-xs   { font-size: 0.9rem; }  /* scade tot pe pagina asta */
+
 }
 
 /* ---------- OVERRIDE VITE DEFAULT ---------- */

@@ -1,3 +1,4 @@
+//src/components/QRCodeDisplay.tsx
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 

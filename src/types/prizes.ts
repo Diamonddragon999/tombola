@@ -19,9 +19,9 @@ export const PRIZES: Readonly<Prize[]> = [
   { id: 'voucher',  name: 'Voucher 5% reducere', rarity: 'voucher',   dailyStock: 9999, image: '/img/voucher.jpg' },
 
   // rare
-  { id: 'sapca',    name: 'Șapcă Hilook',        rarity: 'rare',      dailyStock: 4,    image: '/img/sapca.jpg' },
-  { id: 'tricou',   name: 'Tricou Hilook',       rarity: 'rare',      dailyStock: 4,    image: '/img/tricou.jpg' },
-  { id: 'manusi',   name: 'Mănuși Hikvision',    rarity: 'rare',      dailyStock: 8,    image: '/img/manusi.jpg' },
+  { id: 'sapca',    name: 'Șapcă Hilook',        rarity: 'rare',      dailyStock: 7,    image: '/img/sapca.jpg' },
+  { id: 'tricou',   name: 'Tricou Hilook',       rarity: 'rare',      dailyStock: 7,    image: '/img/tricou.jpg' },
+  { id: 'manusi',   name: 'Mănuși Hikvision',    rarity: 'rare',      dailyStock: 5,    image: '/img/manusi.jpg' },
   { id: 'breloc',   name: 'Breloc Dahua',        rarity: 'rare',      dailyStock: 8,    image: '/img/breloc.jpg' },
   { id: 'pix',      name: 'Pix Dahua',           rarity: 'rare',      dailyStock: 8,    image: '/img/pix.jpg' },
 
@@ -30,7 +30,7 @@ export const PRIZES: Readonly<Prize[]> = [
   { id: 'stick',    name: 'Stick 16GB Dahua',    rarity: 'epic',      dailyStock: 8,    image: '/img/stick.jpg' },
 
   // legendary
-  { id: 'kit',      name: 'Kit 2 Camere Hilook', rarity: 'legendary', dailyStock: 1,    image: '/img/legendary.jpg' },
+  { id: 'kit',      name: 'Camera IP WI-FI', rarity: 'legendary', dailyStock: 1,    image: '/img/legendary.jpg' },
 ] as const;
 
 /** Culori pe rarități */
@@ -49,13 +49,29 @@ export const RARITY_WEIGHTS: Record<Rarity, number> = {
   legendary : 1,
 };
 
+
+/* …restul fişierului rămâne la fel … */
+
+/** Participant complet – versiunea 2 */
 export interface ParticipantData {
-  firstName: string;
-  lastName : string;
-  email    : string;
-  followsSocial: boolean;
-  newsletterConsent: boolean;
-  timestamp: number;
+  /* date personale */
+  firstName : string;
+  lastName  : string;
+  email     : string;
+  age       : number;
+
+  /* engagement social */
+  likeFb : boolean;
+  likeIg : boolean;
+  likeYt : boolean;
+
+  newsletterConsent : boolean;
+
+  /* toate premiile câştigate de‑a lungul zilei */
+  prizes    : Prize[];
+
+  /* momentul primei înscrieri */
+  timestamp : number;
 }
 
 export interface SpinResult {

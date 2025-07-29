@@ -1,3 +1,5 @@
+//src/components/JoinFormUI.tsx
+
 import {
   Card, CardContent, CardHeader, CardTitle,
 } from '@/components/ui/card';
@@ -188,6 +190,9 @@ export default function JoinFormUI() {
             {errors.newsletterConsent && (
               <Err msg={errors.newsletterConsent} />
             )}
+
+            {/* eroare generală (ex: înscris deja) */}
+              {errors._form && <Err msg={errors._form} />}
 
             <Button
               type="submit"

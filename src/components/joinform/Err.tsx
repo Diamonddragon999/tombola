@@ -1,3 +1,4 @@
+//src/components/Err.tsx
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 

@@ -75,33 +75,46 @@ export function addParticipant(p: Omit<ParticipantData,'timestamp'>) {
   const gs = getGameState();
   gs.participants.push({ ...p, timestamp: Date.now() }); save(gs);
 }
-export function addSpinResult(r: Omit<SpinResult,'timestamp'>) {
-  const gs = getGameState();
-  gs.spinResults.push({ ...r, timestamp: Date.now() }); save(gs);
+export function addSpinResult(res: Omit<SpinResult,'timestamp'>): void {
+  const st = getGameState();
+
+  /* 1️⃣  log global */
+  st.spinResults.push({ ...res, timestamp: Date.now() });
+
+  /* 2️⃣  adaugă premiul şi în array‑ul participantului  */
+  const p = st.participants.find(pp => pp.firstName === res.firstName);
+  if (p) p.prizes.push(res.prize);
+
+  save(st); 
 }
 
-/* --------------- export ---------------------- */
+/* ---------- export JSON (structura completă) ---------- */
 export function exportGameData(): string {
-  const gs = getGameState();
-  return JSON.stringify({
-    date: gs.day,
-    totalSpins: gs.totalSpins,
-    remainingStock: gs.remainingStock,
-    participants: gs.participants,
-    spinResults: gs.spinResults,
-  }, null, 2);
+  const st = getGameState();
+  return JSON.stringify(st, null, 2);
 }
 
+/* ---------- export CSV conform cerinţei ---------- */
 export function exportGameDataCsv(): string {
-  const gs = getGameState()
+  const st   = getGameState();
   const rows = [
-    ['Prenume','Nume','Email','Social','Newsletter','Timp'],
-    ...gs.participants.map(p=>[
-      p.firstName, p.lastName, p.email,
-      p.followsSocial?'da':'nu',
-      p.newsletterConsent?'da':'nu',
+    ['Prenume','Nume','Email','Vârsta','Like FB','Like IG','Like YT',
+     'Premii câştigate','Moment']
+  ];
+
+  st.participants.forEach(p => {
+    rows.push([
+      p.firstName,
+      p.lastName,
+      p.email,
+      String(p.age),
+      p.likeFb ? 'da' : 'nu',
+      p.likeIg ? 'da' : 'nu',
+      p.likeYt ? 'da' : 'nu',
+      (p.prizes ?? []).map(pr => pr.name).join('|'),
       new Date(p.timestamp).toLocaleString()
-    ])
-  ]
-  return rows.map(r=>r.join(',')).join('\n')
+    ]);
+  });
+
+  return rows.map(r => r.join(',')).join('\n');
 }

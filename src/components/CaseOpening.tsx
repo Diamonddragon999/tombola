@@ -1,8 +1,9 @@
+// src/components/CaseOpening.tsx
 import { useEffect, useRef } from 'react';
 import { Prize, RARITY_COLORS } from '@/types/prizes';
 
 interface Props {
-  prizes  : Prize[];
+  prizes  : ReadonlyArray<Prize>;   // <-- era Prize[]
   selected: Prize | null;
   rolling : boolean;
   onDone  : () => void;
@@ -36,7 +37,7 @@ export default function CaseOpening({ prizes, selected, rolling, onDone }: Props
     const { SLOT_W, GAP, H, IMG } = getMetrics();
 
     const slots: Prize[] = Array.from({ length: ITEMS }, () =>
-      prizes[Math.floor(Math.random() * prizes.length)]
+      prizes[Math.floor(Math.random() * prizes.length)] as Prize,
     );
     const stopIdx = Math.floor(Math.random() * ITEMS * 0.4) + ITEMS * 0.3;
     slots[stopIdx] = prize;
@@ -61,6 +62,7 @@ export default function CaseOpening({ prizes, selected, rolling, onDone }: Props
       }
       const span = document.createElement('span');
       span.textContent = p.name;
+      span.className   = 'text-center leading-tight';
       div.appendChild(span);
 
       if (i === stopIdx) div.dataset.win = '1';

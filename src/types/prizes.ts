@@ -16,7 +16,7 @@ export interface Prize {
 /** Lista de premii */
 export const PRIZES: Readonly<Prize[]> = [
   // voucher
-  { id: 'voucher',  name: 'Voucher 5% reducere', rarity: 'voucher',   dailyStock: 9999, image: '/img/voucher.jpg' },
+  { id: 'voucher5',  name: 'Voucher 5% reducere', rarity: 'voucher',   dailyStock: 9999, image: '/img/voucher.jpg' },
 
   // rare
   { id: 'sapca',    name: 'Șapcă Hilook',        rarity: 'rare',      dailyStock: 7,    image: '/img/sapca.jpg' },
@@ -26,7 +26,7 @@ export const PRIZES: Readonly<Prize[]> = [
   { id: 'pix',      name: 'Pix Dahua',           rarity: 'rare',      dailyStock: 8,    image: '/img/pix.jpg' },
 
   // epic
-  { id: 'charger',  name: 'Încărcător 45W',      rarity: 'epic',      dailyStock: 12,   image: '/img/charger.jpg' },
+  { id: 'incarcator',  name: 'Încărcător 45W',      rarity: 'epic',      dailyStock: 12,   image: '/img/charger.jpg' },
   { id: 'stick',    name: 'Stick 16GB Dahua',    rarity: 'epic',      dailyStock: 8,    image: '/img/stick.jpg' },
 
   // legendary

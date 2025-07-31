@@ -2,6 +2,7 @@ import {
   Prize, PRIZES, GameState, ParticipantData, SpinResult,
   RARITY_WEIGHTS, UNLIMITED,
 } from '@/types/prizes';
+import { fetchRemoteStock, pushRemoteStock } from './remoteStock';
 
 const KEY = 'festival2025_game_state';
 const today = () => new Date().toISOString().split('T')[0];
@@ -21,7 +22,12 @@ function initState(): GameState {
     day: today(), totalSpins: 0, legendaryGiven: false, isSpinning: false,
     remainingStock: {}, participants: [], spinResults: [],
   };
-  PRIZES.forEach(p => (gs.remainingStock[p.id] = p.dailyStock));
+   PRIZES.forEach(p => (gs.remainingStock[p.id] = p.dailyStock));   // fallback
+  // suprascriem cu stocul real de pe server (async fire-and-forget)
+  fetchRemoteStock().then(remote => {
+     Object.assign(gs.remainingStock, remote);
+     save(gs);
+  });
   save(gs); return gs;
 }
 function resetDaily(prev: GameState): GameState {
@@ -35,7 +41,7 @@ function resetDaily(prev: GameState): GameState {
 /* --------------- premii ---------------------- */
 export function getAvailablePrizes(): Prize[] {
   const gs = getGameState();
-  return PRIZES.filter(p => gs.remainingStock[p.id] > 0);
+  return PRIZES.filter(p => (gs.remainingStock[p.id] ?? 0) > 0);
 }
 export function pickPrize(): Prize {                       // garantat != null
   const gs = getGameState();
@@ -63,6 +69,8 @@ export function consumePrize(id: string) {
   gs.totalSpins++;
   if (id === 'kit') gs.legendaryGiven = true;
   save(gs);
+  //trimitem stocul nou - nu blocam UI
+  pushRemoteStock(gs.remainingStock).catch(console.error);  
 }
 
 /* --------------- flag spinning --------------- */

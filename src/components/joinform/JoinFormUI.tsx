@@ -184,7 +184,7 @@ export default function JoinFormUI() {
                 htmlFor="nl"
                 className="text-white text-sm cursor-pointer"
               >
-                Accept newsletter‑ul *
+                Sunt de acord cu prelucrarea datelor personale conform GDPR si accept sa fiu inscris la newsletter-ul Rovision*
               </Label>
             </div>
             {errors.newsletterConsent && (

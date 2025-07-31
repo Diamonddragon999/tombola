@@ -1,28 +1,33 @@
-import { UNLIMITED } from '@/types/prizes';
+/* src/utils/remoteStock.ts */
+import { PRIZES, UNLIMITED } from '@/types/prizes';
 
 const GET_URL  = 'https://n8n.cristalsrl.ro/webhook/0de050b4-9b31-4c43-8a14-734845a0b9c9';
-const POST_URL =
-  'https://tombola.cristalsrl.ro/api/push-stock'; // absolut
+const POST_URL = 'https://tombola.cristalsrl.ro/api/push-stock';
 
-/** Citeşte stocul live din n8n */
-export async function fetchRemoteStock(): Promise<Record<string, number>> {
-  const js = await fetch(GET_URL).then(r => r.json()) as any[];
-  const rec: Record<string, number> = {};
-  js[0].data.forEach((row: any) => {
-    const raw = (row['Today Stock'] as string).trim();
-    rec[row.ID] = raw.toUpperCase() === 'UNLIMITED' ? UNLIMITED : parseInt(raw, 10);
+export async function fetchRemoteStock() {
+  const js   = await fetch(GET_URL).then(r => r.json()) as any[];
+  const rows = js[0]?.data ?? [];
+  const out: Record<string, number> = {};
+
+  rows.forEach((r: any) => {
+    const raw = (r['Today Stock'] as string).trim();
+    out[r.ID] = raw.toUpperCase() === 'UNLIMITED' ? UNLIMITED : +raw;
   });
-  return rec;
+  return out;
 }
 
-/** Trimite stocul actualizat înapoi către n8n */
+/** ➜ trimitem ÎNTREGUL rând, dar cu stocul actualizat  */
 export async function pushRemoteStock(stock: Record<string, number>) {
+  /* refacem exact schema cerută de n8n */
   const payload = [{
-    data: Object.entries(stock).map(([id, qty]) => ({
-      ID: id,
-      'Today Stock': qty.toString(),
-    })),
+    data: PRIZES.map(p => ({
+      ID          : p.id,
+      Descriere   : p.name,
+      Rarity      : p.rarity,
+      'Today Stock': stock[p.id]?.toString() ?? '0',
+    }))
   }];
+
   await fetch(POST_URL, {
     method : 'POST',
     headers: { 'Content-Type': 'application/json' },

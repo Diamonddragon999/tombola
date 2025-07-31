@@ -1,7 +1,7 @@
 import { UNLIMITED } from '@/types/prizes';
 
 const GET_URL  = 'https://n8n.cristalsrl.ro/webhook/0de050b4-9b31-4c43-8a14-734845a0b9c9';
-const POST_URL = 'https://n8n.cristalsrl.ro/webhook-test/1d14482c-1f0f-4316-ba40-ddb3feab9d0d';
+const POST_URL = '/api/push-stock';     // relativ la domeniul Vercel
 
 /** Citeşte stocul live din n8n */
 export async function fetchRemoteStock(): Promise<Record<string, number>> {

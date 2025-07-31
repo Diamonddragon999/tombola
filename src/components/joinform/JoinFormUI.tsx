@@ -162,7 +162,7 @@ export default function JoinFormUI() {
               tone="red"
               checked={data.followsYoutube}
               icon={<Youtube className="h-4 w-4 text-red-500" />}
-              text="Subscribe pe YouTube"
+              text="Subscribe pe YouTube "
               url="https://www.youtube.com/@rovision1317/"
               onToggle={(v) =>
                 setData({ ...data, followsYoutube: v })

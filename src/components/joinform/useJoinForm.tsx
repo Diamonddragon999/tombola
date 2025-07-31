@@ -105,12 +105,11 @@ export function useJoinForm() {
   firstName : data.firstName,
   lastName  : data.lastName,
   email     : data.email,
-  age       : +data.age,              //  ← number
+  age       : data.age ? +data.age : undefined,
   likeFb    : data.followsFacebook,
   likeIg    : data.followsInstagram,
   likeYt    : data.followsYoutube,
   newsletterConsent : data.newsletterConsent,
-  prizes    : []                      // prima înscriere → încă n‑a câştigat nimic
 });
       localStorage.setItem(LS_KEY, '1');
       setSpinning(true);

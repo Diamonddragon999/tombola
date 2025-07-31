@@ -4,7 +4,7 @@ import { PRIZES, Prize } from '@/types/prizes';
 import { pickPrize, consumePrize, addSpinResult, setSpinning } from '@/utils/gameState';
 import { listen, unlisten, trigger } from '@/utils/realtime';
 import { QRCodeDisplay } from './QRCodeDisplay';
-import { StockTable } from './StockTable';
+import StockTable from './StockTable';
 import CaseOpening from './CaseOpening';
 import { Howl } from 'howler';
 

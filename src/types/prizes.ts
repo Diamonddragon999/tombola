@@ -64,13 +64,11 @@ export interface ParticipantData {
   likeFb : boolean;
   likeIg : boolean;
   likeYt : boolean;
+  followsSocial : boolean;        //  ← ADĂUGAT
 
   newsletterConsent : boolean;
 
-  /* toate premiile câştigate de‑a lungul zilei */
-  prizes    : Prize[];
-
-  /* momentul primei înscrieri */
+  prizes : Prize[];               // câştigurile din aceeaşi zi
   timestamp : number;
 }
 

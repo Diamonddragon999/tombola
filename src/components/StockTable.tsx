@@ -1,22 +1,34 @@
-//src/components/stocktable.tsx
+/* StockTable.tsx – versiunea completă & sincronă cu Google-Sheet */
+
+import { useEffect, useState } from 'react';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PRIZES, RARITY_COLORS, UNLIMITED } from '@/types/prizes';
-import { getGameState } from '@/utils/gameState';
+import { getGameState, listen, unlisten } from '@/utils/gameState';
 
-export function StockTable() {
-  const gs = getGameState();
+export default function StockTable() {
+  /*  preluăm instant stocul curent  */
+  const [gs, setGs] = useState(getGameState());
+
+  /*  şi ne abonăm la toate modificările din gameState  */
+  useEffect(() => {
+    const h = (s: typeof gs) => setGs({ ...s });
+    listen('stock_change', h);
+    return () => unlisten('stock_change', h);
+  }, []);
+
   const fmt = (n: number) => (n >= UNLIMITED ? '∞' : n);
 
   return (
     <Card className="w-full mx-auto glass neon-violet text-base lg:text-lg xl:text-xl">
       <CardHeader>
         <CardTitle className="text-white text-center f-h2 font-extrabold">
-          Stoc Premii – {gs.day}
+          Stoc premii – {gs.day}
         </CardTitle>
       </CardHeader>
+
       <CardContent className="overflow-x-auto pb-6">
         <Table className="w-full">
           <TableHeader>
@@ -34,6 +46,7 @@ export function StockTable() {
               return (
                 <TableRow key={p.id} className="border-white/10 hover:bg-white/5">
                   <TableCell className="text-white">{p.name}</TableCell>
+
                   <TableCell>
                     <span
                       className="px-3 py-0.5 rounded-full text-black font-bold text-[10px] sm:text-xs shadow-lg uppercase"
@@ -42,8 +55,13 @@ export function StockTable() {
                       {p.rarity}
                     </span>
                   </TableCell>
-                  <TableCell className="font-bold text-green-400">{fmt(rem)}</TableCell>
-                  <TableCell className="text-gray-200">{fmt(p.dailyStock)}</TableCell>
+
+                  <TableCell className="font-bold text-green-400">
+                    {fmt(rem)}
+                  </TableCell>
+                  <TableCell className="text-gray-200">
+                    {fmt(p.dailyStock)}
+                  </TableCell>
                 </TableRow>
               );
             })}

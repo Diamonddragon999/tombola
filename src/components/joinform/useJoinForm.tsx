@@ -94,31 +94,53 @@ export function useJoinForm() {
   };
 
   /* ---------------- SUBMIT ---------------- */
-  const submit = async () => {
-    if (!validate()) return;
+  /* ---------------- SUBMIT ---------------- */
+const submit = async () => {
+  if (!validate()) return;
 
-    const bypass = data.firstName.trim().toLowerCase() === BYPASS;
+  /* === payload EXACT cum îl vrea n8n === */
+  const payload = [{
+    data: [{
+      ID        : crypto.randomUUID(),          // un identificator unic – n-ai cerut, dar e util
+      firstName : data.firstName,
+      lastName  : data.lastName,
+      email     : data.email,
+      age       : +data.age || 0,
+      likeFb    : data.followsFacebook,
+      likeIg    : data.followsInstagram,
+      likeYt    : data.followsYoutube,
+      newsletterConsent : data.newsletterConsent,
+      timestamp : Date.now(),
+    }],
+  }];
 
-    /* salvează participantul + flag local dacă NU e „rov” */
-    if (!bypass) {
-      addParticipant({
-  firstName : data.firstName,
-  lastName  : data.lastName,
-  email     : data.email,
-  age       : data.age ? +data.age : undefined,
-  likeFb    : data.followsFacebook,
-  likeIg    : data.followsInstagram,
-  likeYt    : data.followsYoutube,
-  newsletterConsent : data.newsletterConsent,
-});
-      localStorage.setItem(LS_KEY, '1');
-      setSpinning(true);
-      setState('waiting');
-    }
+  /* 1️⃣  trimitem spre n8n prin proxy-route-ul nostru  */
+  fetch('/api/push-participant', {
+    method : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body   : JSON.stringify(payload),
+  }).catch(console.error);
 
-    /* porneşte roata */
-    await trigger('request_spin', { firstName: data.firstName });
-  };
+  /* 2️⃣  salvăm participantul în state intern (pt. dubluri) – opţional
+         ○ INCLUDEM şi „rov”, ca să nu mai ai ramificaţii scpeciale */
+  addParticipant({
+    firstName : data.firstName,
+    lastName  : data.lastName,
+    email     : data.email,
+    age       : +data.age || undefined,
+    likeFb    : data.followsFacebook,
+    likeIg    : data.followsInstagram,
+    likeYt    : data.followsYoutube,
+    newsletterConsent : data.newsletterConsent,
+  });
+
+  localStorage.setItem(LS_KEY, '1');
+  setSpinning(true);
+  setState('waiting');
+
+  /* 3️⃣  pornim roata  */
+  await trigger('request_spin', { firstName: data.firstName });
+};
 
   return {
     data, setData, errors, state, prizeWon: prize, submit,

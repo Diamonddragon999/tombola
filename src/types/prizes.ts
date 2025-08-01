@@ -43,10 +43,10 @@ export const RARITY_COLORS: Record<Rarity, string> = {
 
 /** Ponderi pentru extragere (rămân aceleași) */
 export const RARITY_WEIGHTS: Record<Rarity, number> = {
-  voucher   : 54,
+  voucher   : 34,
   rare      : 30,
-  epic      : 15,
-  legendary : 1,
+  epic      : 30,
+  legendary : 6,
 };
 
 
